@@ -178,31 +178,21 @@
   .step h4 { font-size: 1rem; font-weight: 600; margin-bottom: 2px; }
   .step p { color: var(--muted); font-size: 0.9rem; }
 
-  /* pricing */
-  .price-card {
-    background: linear-gradient(165deg, var(--navy-700), var(--navy-800));
-    border: 1px solid rgba(34, 211, 238, 0.22);
-    border-radius: 20px; padding: 34px; margin-top: 26px;
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
-  }
-  .price-row { display: flex; flex-wrap: wrap; gap: 28px; }
-  .price-box { flex: 1; min-width: 200px; }
-  .price-box .k { font-size: 0.8rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
-  .price-box .v { font-size: 2.3rem; font-weight: 800; letter-spacing: -0.02em; }
-  .price-box .v span { font-size: 1rem; font-weight: 500; color: var(--muted); }
-  .price-box .d { font-size: 0.86rem; color: var(--muted); margin-top: 6px; }
-  .price-incl { margin-top: 26px; padding-top: 24px; border-top: 1px solid var(--line); }
-  .price-incl li { list-style: none; color: var(--muted); font-size: 0.92rem; padding: 5px 0 5px 26px; position: relative; }
-  .price-incl li::before {
-    content: ""; position: absolute; left: 4px; top: 11px; width: 7px; height: 7px;
-    border-radius: 50%; background: var(--cyan); box-shadow: 0 0 8px var(--cyan);
-  }
-  .terms { margin-top: 20px; font-size: 0.9rem; color: var(--cyan-soft); font-weight: 500; }
-
   /* cta */
   .cta { text-align: center; padding: 64px 0 40px; }
   .cta h2 { margin-bottom: 14px; }
-  .cta p { color: var(--muted); max-width: 480px; margin: 0 auto 28px; }
+  .cta .cta-sub { color: var(--muted); max-width: 520px; margin: 0 auto 32px; font-size: 1.05rem; }
+  .cta-points {
+    display: inline-flex; flex-direction: column; gap: 10px;
+    text-align: left; margin: 0 auto 32px; max-width: 420px; width: 100%;
+  }
+  .cta-point {
+    display: flex; align-items: flex-start; gap: 12px;
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 13px 16px; font-size: 0.9rem; color: var(--muted);
+  }
+  .cta-point .dot { flex: none; width: 8px; height: 8px; margin-top: 5px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 8px var(--cyan); }
+  .cta-point strong { color: var(--ink); font-weight: 600; }
   .btn {
     display: inline-flex; align-items: center; gap: 9px;
     background: linear-gradient(100deg, var(--cyan), var(--violet));
@@ -220,7 +210,6 @@
   @media (max-width: 640px) {
     .stats { grid-template-columns: 1fr; }
     .caps { grid-template-columns: 1fr; }
-    .price-card { padding: 24px; }
   }
   @media (prefers-reduced-motion: reduce) {
     .orb i, .orb b { animation: none; }
@@ -297,39 +286,16 @@
       </div>
     </section>
 
-    <section class="block">
-      <div class="wrap">
-        <div class="label">Investment</div>
-        <h2>Simple, flat pricing — no per-call surprises</h2>
-        <div class="price-card">
-          <div class="price-row">
-            <div class="price-box">
-              <div class="k">One-time setup</div>
-              <div class="v">$349</div>
-              <div class="d">Full build, customization, training on your business, test calls, and launch.</div>
-            </div>
-            <div class="price-box">
-              <div class="k">Monthly service</div>
-              <div class="v">$399<span> / month</span></div>
-              <div class="d">Everything below, hosted and maintained.</div>
-            </div>
-          </div>
-          <ul class="price-incl">
-            <li>Up to ~1,000 talk-minutes per month (comfortably covers 300+ calls)</li>
-            <li>24/7 answering, booking, message-taking, emergency routing and transfers</li>
-            <li>Call logs and ongoing adjustments</li>
-            <li>Additional minutes beyond the bucket billed at $0.35/min</li>
-          </ul>
-          <div class="terms">Month-to-month · No long-term contract · Cancel anytime</div>
-        </div>
-      </div>
-    </section>
-
     <section class="cta">
       <div class="wrap">
-        <h2>Ready to stop losing calls?</h2>
-        <p>The next step is a quick 15–20 minute discovery call. We'll have your receptionist live within about a week.</p>
-        <a class="btn" href="mailto:deins@scalelabai.ca?subject=AI%20Receptionist%20-%20Let's%20book%20a%20call">Book the discovery call →</a>
+        <h2>Let's find the right fit for <span class="accent" data-field="company">your business</span></h2>
+        <p class="cta-sub">Pricing depends on your call volume and exactly what you need the receptionist to handle — so rather than guess, let's spend 15–20 minutes figuring it out together. You'll leave the call with a clear number and a clear picture of how it works.</p>
+        <div class="cta-points">
+          <div class="cta-point"><span class="dot"></span><span><strong>What we'll cover:</strong> your call volume, hours, services, and what you want handled vs. escalated</span></div>
+          <div class="cta-point"><span class="dot"></span><span><strong>You'll hear a demo</strong> of how the receptionist sounds and how it handles calls in your trade</span></div>
+          <div class="cta-point"><span class="dot"></span><span><strong>You'll get a price</strong> built around your actual needs — no guessing, no generic packages</span></div>
+        </div>
+        <a class="btn" href="mailto:deins@scalelabai.ca?subject=AI%20Receptionist%20Discovery%20Call">Book the discovery call →</a>
         <p class="contact">Or reach me directly · <a href="mailto:deins@scalelabai.ca">deins@scalelabai.ca</a></p>
       </div>
     </section>
