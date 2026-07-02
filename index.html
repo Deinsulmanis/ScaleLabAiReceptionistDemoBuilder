@@ -216,6 +216,14 @@
     html { scroll-behavior: auto; }
   }
 </style>
+<!-- Google Analytics 4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'GA_MEASUREMENT_ID', { page_location: window.location.href });
+</script>
 </head>
 <body>
 
@@ -339,6 +347,15 @@
         opp.textContent = "In " + nichePhrase +
           ", calls come in all day — and the ones that ring out while you're busy, on another line, or after hours don't wait around.";
       }
+    }
+
+    // GA4: report which prospect viewed this proposal
+    if (typeof gtag === 'function') {
+      gtag('event', 'proposal_viewed', {
+        company: company || '(none)',
+        contact: contact || '(none)',
+        niche:   niche   || '(none)',
+      });
     }
   })();
 </script>
