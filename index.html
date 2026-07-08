@@ -216,6 +216,8 @@
     html { scroll-behavior: auto; }
   }
 </style>
+<link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
+<script src="https://assets.calendly.com/assets/external/widget.js" type="text/javascript" async></script>
 <!-- Google Analytics 4 -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-Z8RGCME7CY"></script>
 <script>
@@ -304,7 +306,7 @@
           <div class="cta-point"><span class="dot"></span><span><strong>You'll hear a demo</strong> of how the receptionist sounds and how it handles calls in your trade</span></div>
           <div class="cta-point"><span class="dot"></span><span><strong>You'll get a price</strong> built around your actual needs — no guessing, no generic packages</span></div>
         </div>
-        <a class="btn" href="mailto:deins@scalelabai.ca?subject=Re%3A%20AI%20Receptionist%20for%20your%20business&body=Hi%20Deins%2C%0A%0AI%27d%20like%20to%20book%20a%20discovery%20call.">Reply to book a call →</a>
+        <a class="btn" href="" onclick="Calendly.initPopupWidget({url:'https://calendly.com/deins-scalelabai/discovery-call'});return false;">Book a discovery call →</a>
         <p class="contact">Or text me directly · <a href="sms:+16048369902">604-836-9902</a> · <a href="mailto:deins@scalelabai.ca">deins@scalelabai.ca</a></p>
       </div>
     </section>
@@ -391,14 +393,6 @@
         el.innerHTML = el.innerHTML
           .replace(/in your trade/gi, 'for an aesthetic clinic');
       });
-    }
-
-    // Dynamic btn subject line
-    var btn = document.querySelector('.btn');
-    if (btn && company) {
-      btn.href = 'mailto:deins@scalelabai.ca?subject=Re%3A%20AI%20Receptionist%20for%20'
-        + encodeURIComponent(company)
-        + '&body=Hi%20Deins%2C%0A%0AI%27d%20like%20to%20book%20a%20discovery%20call.';
     }
 
     // GA4: report which prospect viewed this proposal
