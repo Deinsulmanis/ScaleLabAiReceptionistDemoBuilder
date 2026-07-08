@@ -298,14 +298,14 @@
     <section class="cta">
       <div class="wrap">
         <h2>Let's find the right fit for <span class="accent" data-field="company">your business</span></h2>
-        <p class="cta-sub">Pricing depends on your call volume and exactly what you need the receptionist to handle — so rather than guess, let's spend 15–20 minutes figuring it out together. You'll leave the call with a clear number and a clear picture of how it works.</p>
+        <p class="cta-sub">Pricing is based on your call volume and what you need handled — reply to this email or text me and we'll set up 15 minutes to go through it. You'll hear a live demo and leave with a clear number.</p>
         <div class="cta-points">
           <div class="cta-point"><span class="dot"></span><span><strong>What we'll cover:</strong> your call volume, hours, services, and what you want handled vs. escalated</span></div>
           <div class="cta-point"><span class="dot"></span><span><strong>You'll hear a demo</strong> of how the receptionist sounds and how it handles calls in your trade</span></div>
           <div class="cta-point"><span class="dot"></span><span><strong>You'll get a price</strong> built around your actual needs — no guessing, no generic packages</span></div>
         </div>
-        <a class="btn" href="mailto:deins@scalelabai.ca?subject=AI%20Receptionist%20Discovery%20Call">Book the discovery call →</a>
-        <p class="contact">Or reach me directly · <a href="mailto:deins@scalelabai.ca">deins@scalelabai.ca</a></p>
+        <a class="btn" href="mailto:deins@scalelabai.ca?subject=Re%3A%20AI%20Receptionist%20for%20your%20business&body=Hi%20Deins%2C%0A%0AI%27d%20like%20to%20book%20a%20discovery%20call.">Reply to book a call →</a>
+        <p class="contact">Or text me directly · <a href="sms:+17788800164">778-880-0164</a> · <a href="mailto:deins@scalelabai.ca">deins@scalelabai.ca</a></p>
       </div>
     </section>
   </main>
@@ -347,6 +347,58 @@
         opp.textContent = "In " + nichePhrase +
           ", calls come in all day — and the ones that ring out while you're busy, on another line, or after hours don't wait around.";
       }
+    }
+
+    // Med spa / clinic language swap
+    var isMedSpa = niche && (
+      niche.toLowerCase().includes('med') ||
+      niche.toLowerCase().includes('spa') ||
+      niche.toLowerCase().includes('aesthetic') ||
+      niche.toLowerCase().includes('clinic')
+    );
+
+    if (isMedSpa) {
+      document.querySelectorAll('.cap p, .cap h4').forEach(function(el) {
+        el.innerHTML = el.innerHTML
+          .replace(/\bthe job\b/gi, 'the appointment')
+          .replace(/\ba job\b/gi, 'an appointment')
+          .replace(/\bjob\b/gi, 'appointment')
+          .replace(/\btrade\b/gi, 'practice');
+      });
+
+      document.querySelectorAll('p.body, p.lead').forEach(function(el) {
+        el.innerHTML = el.innerHTML
+          .replace(/home and field service businesses/gi, 'medical aesthetic clinics')
+          .replace(/service businesses/gi, 'aesthetic clinics')
+          .replace(/a single recovered job/gi, 'a single recovered booking')
+          .replace(/ready-to-hire customer/gi, 'new client')
+          .replace(/\bthe job\b/gi, 'the appointment')
+          .replace(/\bjobs\b/gi, 'appointments')
+          .replace(/\btrade\b/gi, 'practice');
+      });
+
+      var heroSub = document.querySelector('.hero .sub');
+      if (heroSub) {
+        heroSub.innerHTML = 'A receptionist that answers every call, day or night, books the appointment, and makes sure the next client inquiry is yours — not a competitor\'s.';
+      }
+
+      document.querySelectorAll('h2').forEach(function(el) {
+        el.innerHTML = el.innerHTML
+          .replace(/a single recovered job/gi, 'a single recovered booking');
+      });
+
+      document.querySelectorAll('.cta-point').forEach(function(el) {
+        el.innerHTML = el.innerHTML
+          .replace(/in your trade/gi, 'for an aesthetic clinic');
+      });
+    }
+
+    // Dynamic btn subject line
+    var btn = document.querySelector('.btn');
+    if (btn && company) {
+      btn.href = 'mailto:deins@scalelabai.ca?subject=Re%3A%20AI%20Receptionist%20for%20'
+        + encodeURIComponent(company)
+        + '&body=Hi%20Deins%2C%0A%0AI%27d%20like%20to%20book%20a%20discovery%20call.';
     }
 
     // GA4: report which prospect viewed this proposal
