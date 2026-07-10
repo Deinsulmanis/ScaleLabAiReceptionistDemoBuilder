@@ -178,6 +178,29 @@
   .step h4 { font-size: 1rem; font-weight: 600; margin-bottom: 2px; }
   .step p { color: var(--muted); font-size: 0.9rem; }
 
+  /* demo audio */
+  .demo { text-align: center; padding: 52px 0; border-top: 1px solid var(--line); }
+  .demo .label { margin-bottom: 14px; }
+  .demo h2 { margin-bottom: 10px; }
+  .demo-sub { color: var(--muted); font-size: 0.95rem; margin: 0 auto 28px; max-width: 500px; }
+  .demo-player {
+    display: inline-flex; flex-direction: column; align-items: center; gap: 16px;
+    background: var(--navy-700); border: 1px solid rgba(34, 211, 238, 0.22);
+    border-radius: 18px; padding: 24px 28px; max-width: 500px; width: 100%;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.35);
+  }
+  .demo-badge {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--cyan); font-weight: 600;
+  }
+  .demo-badge .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--cyan); box-shadow: 0 0 8px var(--cyan);
+    animation: pulse 2.6s ease-in-out infinite;
+  }
+  .demo-player audio { width: 100%; accent-color: var(--cyan); }
+
   /* cta */
   .cta { text-align: center; padding: 64px 0 40px; }
   .cta h2 { margin-bottom: 14px; }
@@ -241,6 +264,21 @@
   </header>
 
   <main>
+    <section class="demo">
+      <div class="wrap">
+        <div class="label">Hear it for yourself</div>
+        <h2>This is what your callers hear</h2>
+        <p class="demo-sub">A real 90-second call — no script, no human. This is the receptionist answering questions and booking an appointment.</p>
+        <div class="demo-player">
+          <div class="demo-badge"><span class="dot"></span> Live AI Demo</div>
+          <audio controls>
+            <source src="audio/demo.mp3" type="audio/mpeg">
+            Your browser doesn't support audio — <a href="audio/demo.mp3" style="color:var(--cyan-soft)">download the demo</a>.
+          </audio>
+        </div>
+      </div>
+    </section>
+
     <section class="block">
       <div class="wrap">
         <div class="label">The opportunity</div>
