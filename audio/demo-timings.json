@@ -1,0 +1,104 @@
+{
+  "audio": "demo-audio.mp3",
+  "totalDuration": 88.281,
+  "lines": [
+    {
+      "index": 0,
+      "speaker": "caller",
+      "text": "Hi, I saw your ad online — I'm looking into Botox and wanted to ask a couple things before booking.",
+      "start": 0,
+      "end": 6.873
+    },
+    {
+      "index": 1,
+      "speaker": "veronica",
+      "text": "Of course! Happy to help. What would you like to know?",
+      "start": 7.273,
+      "end": 10.477
+    },
+    {
+      "index": 2,
+      "speaker": "caller",
+      "text": "Wait — is this a real person, or am I talking to a bot?",
+      "start": 10.877,
+      "end": 14.314
+    },
+    {
+      "index": 3,
+      "speaker": "veronica",
+      "text": "Good question — I'm actually an AI assistant for the clinic, but I've got all the info you need and I can book you in too. What would you like to know about Botox?",
+      "start": 14.714,
+      "end": 24.188
+    },
+    {
+      "index": 4,
+      "speaker": "caller",
+      "text": "Huh, okay... I guess that's fine. How long does it usually take to see results, and how long does it last?",
+      "start": 24.588,
+      "end": 32.343
+    },
+    {
+      "index": 5,
+      "speaker": "veronica",
+      "text": "Totally understand the surprise! To answer that — most clients start seeing results within three to seven days, and it typically lasts three to four months. There's minimal downtime too, so you can usually go right back to your day.",
+      "start": 32.743,
+      "end": 45.514
+    },
+    {
+      "index": 6,
+      "speaker": "caller",
+      "text": "Okay. I've got an event coming up in about two weeks — would that even be enough time?",
+      "start": 45.914,
+      "end": 51.626
+    },
+    {
+      "index": 7,
+      "speaker": "veronica",
+      "text": "That should work well, since results are usually visible within a week. I'd recommend booking a consultation soon just to make sure we have you in comfortably before then. Want me to check availability?",
+      "start": 52.026,
+      "end": 62.568
+    },
+    {
+      "index": 8,
+      "speaker": "caller",
+      "text": "I mean... sure, I guess we can try that.",
+      "start": 62.968,
+      "end": 65.429
+    },
+    {
+      "index": 9,
+      "speaker": "veronica",
+      "text": "No pressure at all — I have an opening this Thursday at 2 PM, or Friday at 10 AM. Either work?",
+      "start": 65.829,
+      "end": 71.774
+    },
+    {
+      "index": 10,
+      "speaker": "caller",
+      "text": "Thursday at 2, I suppose.",
+      "start": 72.174,
+      "end": 74.403
+    },
+    {
+      "index": 11,
+      "speaker": "veronica",
+      "text": "Perfect, you're booked for Thursday at 2 PM. I'll send a confirmation text with the details. Anything else I can help with?",
+      "start": 74.803,
+      "end": 82.14
+    },
+    {
+      "index": 12,
+      "speaker": "caller",
+      "text": "No, actually that was easier than I expected. Thanks.",
+      "start": 82.54,
+      "end": 85.838
+    },
+    {
+      "index": 13,
+      "speaker": "veronica",
+      "text": "Happy to help — see you Thursday!",
+      "start": 86.238,
+      "end": 88.281
+    }
+  ]
+}

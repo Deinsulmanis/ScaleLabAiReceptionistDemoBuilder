@@ -178,28 +178,121 @@
   .step h4 { font-size: 1rem; font-weight: 600; margin-bottom: 2px; }
   .step p { color: var(--muted); font-size: 0.9rem; }
 
-  /* demo audio */
+  /* demo — synced transcript player */
   .demo { text-align: center; padding: 52px 0; border-top: 1px solid var(--line); }
   .demo .label { margin-bottom: 14px; }
   .demo h2 { margin-bottom: 10px; }
   .demo-sub { color: var(--muted); font-size: 0.95rem; margin: 0 auto 28px; max-width: 500px; }
   .demo-player {
-    display: inline-flex; flex-direction: column; align-items: center; gap: 16px;
+    max-width: 520px; width: 100%; margin: 0 auto; text-align: left;
     background: var(--navy-700); border: 1px solid rgba(34, 211, 238, 0.22);
-    border-radius: 18px; padding: 24px 28px; max-width: 500px; width: 100%;
+    border-radius: 20px; padding: 20px;
     box-shadow: 0 16px 48px rgba(0,0,0,0.35);
   }
   .demo-badge {
-    display: flex; align-items: center; gap: 8px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
     font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase;
-    color: var(--cyan); font-weight: 600;
+    color: var(--cyan); font-weight: 600; margin-bottom: 16px;
   }
   .demo-badge .dot {
     width: 7px; height: 7px; border-radius: 50%;
     background: var(--cyan); box-shadow: 0 0 8px var(--cyan);
     animation: pulse 2.6s ease-in-out infinite;
   }
-  .demo-player audio { width: 100%; accent-color: var(--cyan); }
+
+  /* chat window */
+  .chat-shell { position: relative; }
+  .chat-window {
+    height: 400px; overflow-y: auto; padding: 6px 2px;
+    display: flex; flex-direction: column; gap: 14px; scroll-behavior: smooth;
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 20px, #000 calc(100% - 20px), transparent);
+            mask-image: linear-gradient(to bottom, transparent, #000 20px, #000 calc(100% - 20px), transparent);
+  }
+  .chat-window::-webkit-scrollbar { width: 6px; }
+  .chat-window::-webkit-scrollbar-thumb { background: rgba(146,160,189,0.25); border-radius: 3px; }
+
+  .msg { display: flex; flex-direction: column; max-width: 82%; opacity: 0; }
+  .msg.show { opacity: 1; }
+  .msg.animate { transform: translateY(14px); }
+  .msg.animate.show { transform: translateY(0); transition: opacity .45s ease, transform .45s cubic-bezier(.2,.7,.2,1); }
+  .msg.caller { align-self: flex-start; align-items: flex-start; }
+  .msg.veronica { align-self: flex-end; align-items: flex-end; }
+
+  .msg .who {
+    font-size: 0.64rem; letter-spacing: 0.09em; text-transform: uppercase;
+    color: var(--muted-dim); font-weight: 600; margin: 0 6px 5px;
+  }
+  .msg.veronica .who { color: var(--cyan); }
+
+  .bubble {
+    padding: 12px 15px; border-radius: 16px; font-size: 0.92rem; line-height: 1.5;
+    border: 1px solid transparent; transition: border-color .3s ease, box-shadow .3s ease;
+  }
+  .msg.caller .bubble {
+    background: var(--navy-600); color: var(--ink);
+    border-color: var(--line); border-bottom-left-radius: 5px;
+  }
+  .msg.veronica .bubble {
+    background: linear-gradient(135deg, rgba(34,211,238,0.15), rgba(139,92,246,0.15));
+    color: var(--ink); border-color: rgba(34,211,238,0.28); border-bottom-right-radius: 5px;
+  }
+  .msg.active .bubble { border-color: var(--cyan); box-shadow: 0 0 0 1px rgba(34,211,238,.5), 0 0 22px rgba(34,211,238,.26); }
+  .msg.veronica.active .bubble { border-color: var(--violet-soft); box-shadow: 0 0 0 1px rgba(139,92,246,.5), 0 0 22px rgba(139,92,246,.3); }
+  .msg.active { animation: msgpulse 2.2s ease-in-out infinite; }
+  @keyframes msgpulse { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.13); } }
+
+  /* press-play overlay */
+  .chat-overlay {
+    position: absolute; inset: 0; z-index: 3; border-radius: 14px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+    background: linear-gradient(180deg, rgba(11,17,32,.55), rgba(11,17,32,.85));
+    -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
+    cursor: pointer; text-align: center;
+  }
+  .chat-overlay p { color: var(--muted); font-size: .9rem; }
+  .chat-overlay.hidden { display: none; }
+  .overlay-play {
+    width: 66px; height: 66px; border-radius: 50%; border: none; cursor: pointer;
+    background: linear-gradient(100deg, var(--cyan), var(--violet));
+    display: grid; place-items: center; box-shadow: 0 12px 34px rgba(34,211,238,.42);
+    transition: transform .18s ease;
+  }
+  .overlay-play:hover { transform: scale(1.06); }
+  .overlay-play svg { width: 26px; height: 26px; fill: #07101e; margin-left: 3px; }
+
+  /* controls */
+  .player-controls { display: flex; align-items: center; gap: 14px; margin-top: 18px; padding: 0 2px; }
+  .play-toggle {
+    flex: none; width: 46px; height: 46px; border-radius: 50%; border: none; cursor: pointer;
+    background: linear-gradient(100deg, var(--cyan), var(--violet));
+    display: grid; place-items: center; box-shadow: 0 8px 22px rgba(34,211,238,.3);
+    transition: transform .16s ease;
+  }
+  .play-toggle:hover { transform: translateY(-1px) scale(1.04); }
+  .play-toggle svg { width: 20px; height: 20px; fill: #07101e; }
+  .play-toggle .ic-play { margin-left: 2px; }
+
+  .progress-wrap { flex: 1; }
+  .progress-track { position: relative; height: 7px; border-radius: 999px; background: rgba(146,160,189,.18); cursor: pointer; }
+  .progress-track:focus-visible { outline: 2px solid var(--cyan-soft); outline-offset: 3px; }
+  .progress-fill { position: absolute; left: 0; top: 0; height: 100%; width: 0; border-radius: 999px; background: linear-gradient(90deg, var(--cyan), var(--violet)); }
+  .progress-knob { position: absolute; top: 50%; left: 0; width: 13px; height: 13px; border-radius: 50%; background: #fff; transform: translate(-50%,-50%); box-shadow: 0 0 8px rgba(34,211,238,.7); pointer-events: none; }
+  .time-display { flex: none; font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; min-width: 84px; text-align: right; }
+
+  /* graceful fallback */
+  .demo-fallback audio { width: 100%; accent-color: var(--cyan); }
+
+  @media (max-width: 640px) {
+    .chat-window { height: 340px; }
+    .msg { max-width: 88%; }
+    .time-display { min-width: 74px; font-size: .74rem; }
+    .player-controls { gap: 10px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .msg.animate, .msg.animate.show { transform: none; transition: opacity .2s ease; }
+    .msg.active { animation: none; }
+    .chat-window { scroll-behavior: auto; }
+  }
 
   /* cta */
   .cta { text-align: center; padding: 64px 0 40px; }
@@ -268,13 +361,44 @@
       <div class="wrap">
         <div class="label">Hear it for yourself</div>
         <h2>This is what your callers hear</h2>
-        <p class="demo-sub">A real 90-second call — no script, no human. This is the receptionist answering questions and booking an appointment.</p>
+        <p class="demo-sub">A real 90-second call — no script, no human. Press play and watch the conversation unfold in real time.</p>
         <div class="demo-player">
           <div class="demo-badge"><span class="dot"></span> Live AI Demo</div>
-          <audio controls>
-            <source src="audio/demo.mp3" type="audio/mpeg">
-            Your browser doesn't support audio — <a href="audio/demo.mp3" style="color:var(--cyan-soft)">download the demo</a>.
-          </audio>
+
+          <!-- Interactive synced transcript player — revealed by JS once timings load -->
+          <div class="demo-interactive" id="demoInteractive" hidden>
+            <div class="chat-shell">
+              <div class="chat-window" id="chatWindow" aria-live="polite"></div>
+              <div class="chat-overlay" id="chatOverlay" role="button" tabindex="0" aria-label="Play the demo call">
+                <button class="overlay-play" id="overlayPlay" aria-label="Play the demo call" type="button">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+                </button>
+                <p>Press play to hear a live call</p>
+              </div>
+            </div>
+            <div class="player-controls">
+              <button class="play-toggle" id="playToggle" type="button" aria-label="Play">
+                <svg class="ic-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+                <svg class="ic-pause" viewBox="0 0 24 24" aria-hidden="true" hidden><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+              </button>
+              <div class="progress-wrap">
+                <div class="progress-track" id="progressTrack" role="slider" tabindex="0"
+                     aria-label="Seek through the call" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                  <div class="progress-fill" id="progressFill"></div>
+                  <div class="progress-knob" id="progressKnob"></div>
+                </div>
+              </div>
+              <div class="time-display" id="timeDisplay">0:00 / 0:00</div>
+            </div>
+          </div>
+
+          <!-- Graceful fallback: plain audio, shown by default and hidden by JS on success -->
+          <div class="demo-fallback" id="demoFallback">
+            <audio controls preload="none">
+              <source src="audio/demo-audio.mp3" type="audio/mpeg">
+              Your browser doesn't support audio — <a href="audio/demo-audio.mp3" style="color:var(--cyan-soft)">download the demo</a>.
+            </audio>
+          </div>
         </div>
       </div>
     </section>
@@ -439,6 +563,151 @@
         company: company || '(none)',
         contact: contact || '(none)',
         niche:   niche   || '(none)',
+      });
+    }
+  })();
+</script>
+
+<script>
+  /* Synced transcript demo player — progressively enhances the demo section.
+     If timings can't be fetched (e.g. opened via file://, where fetch() is
+     blocked by CORS), the plain <audio controls> fallback stays visible. */
+  (function () {
+    var AUDIO_SRC   = 'audio/demo-audio.mp3';
+    var TIMINGS_URL = 'audio/demo-timings.json';
+
+    var interactive = document.getElementById('demoInteractive');
+    var fallback    = document.getElementById('demoFallback');
+    if (!interactive || !fallback || !window.fetch) return;
+
+    fetch(TIMINGS_URL)
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (data) {
+        if (!data || !Array.isArray(data.lines) || !data.lines.length) throw new Error('empty timings');
+        init(data);
+        fallback.hidden = true;
+        interactive.hidden = false;
+      })
+      .catch(function () { /* keep the plain <audio> fallback visible */ });
+
+    function fmt(t) {
+      t = Math.max(0, Math.floor(t || 0));
+      var m = Math.floor(t / 60), s = t % 60;
+      return m + ':' + (s < 10 ? '0' : '') + s;
+    }
+
+    function init(data) {
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var lines  = data.lines.slice().sort(function (a, b) { return a.start - b.start; });
+
+      var chatWindow  = document.getElementById('chatWindow');
+      var overlay     = document.getElementById('chatOverlay');
+      var overlayPlay = document.getElementById('overlayPlay');
+      var playToggle  = document.getElementById('playToggle');
+      var icPlay      = playToggle.querySelector('.ic-play');
+      var icPause     = playToggle.querySelector('.ic-pause');
+      var track       = document.getElementById('progressTrack');
+      var fill        = document.getElementById('progressFill');
+      var knob        = document.getElementById('progressKnob');
+      var timeDisplay = document.getElementById('timeDisplay');
+
+      var audio = new Audio();
+      audio.preload = 'metadata';
+      audio.src = AUDIO_SRC;
+
+      var els = lines.map(function (ln) {
+        var msg = document.createElement('div');
+        msg.className = 'msg ' + (ln.speaker === 'veronica' ? 'veronica' : 'caller') + (reduce ? '' : ' animate');
+        var who = document.createElement('div');
+        who.className = 'who';
+        who.textContent = ln.speaker === 'veronica' ? 'Veronica · AI Receptionist' : 'Caller';
+        var bubble = document.createElement('div');
+        bubble.className = 'bubble';
+        bubble.textContent = ln.text;
+        msg.appendChild(who); msg.appendChild(bubble);
+        chatWindow.appendChild(msg);
+        return msg;
+      });
+
+      var duration = data.totalDuration || lines[lines.length - 1].end || 0;
+      var started = false, lastIdx = -2;
+
+      // Teaser: the first message peeks through behind the overlay before play.
+      els[0].classList.add('show');
+      updateProgress(0);
+
+      audio.addEventListener('loadedmetadata', function () {
+        if (isFinite(audio.duration) && audio.duration > 0) duration = audio.duration;
+        updateProgress(audio.currentTime);
+      });
+
+      function idxForTime(t) {
+        var idx = -1;
+        for (var i = 0; i < lines.length; i++) { if (t >= lines[i].start) idx = i; else break; }
+        return idx;
+      }
+
+      function updateProgress(t) {
+        var pct = duration ? Math.min(100, Math.max(0, (t / duration) * 100)) : 0;
+        fill.style.width = pct + '%';
+        knob.style.left = pct + '%';
+        track.setAttribute('aria-valuenow', Math.round(pct));
+        timeDisplay.textContent = fmt(t) + ' / ' + fmt(duration);
+      }
+
+      function renderMessages(idx) {
+        for (var i = 0; i < els.length; i++) {
+          els[i].classList.toggle('show', i <= idx);
+          els[i].classList.toggle('active', i === idx);
+        }
+        if (idx >= 0) {
+          var el = els[idx];
+          var top = el.offsetTop - chatWindow.clientHeight / 2 + el.clientHeight / 2;
+          chatWindow.scrollTo({ top: Math.max(0, top), behavior: reduce ? 'auto' : 'smooth' });
+        }
+      }
+
+      function onTime(t) {
+        var idx = idxForTime(t);
+        if (idx !== lastIdx) { renderMessages(idx); lastIdx = idx; }
+        updateProgress(t);
+      }
+
+      function begin() { if (!started) { started = true; overlay.classList.add('hidden'); } }
+      function play()  { begin(); audio.play(); }
+      function toggle() { if (audio.paused) play(); else audio.pause(); }
+
+      overlay.addEventListener('click', play);
+      overlay.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { play(); e.preventDefault(); } });
+      overlayPlay.addEventListener('click', function (e) { e.stopPropagation(); play(); });
+      playToggle.addEventListener('click', toggle);
+
+      audio.addEventListener('play',  function () { icPlay.hidden = true;  icPause.hidden = false; playToggle.setAttribute('aria-label', 'Pause'); });
+      audio.addEventListener('pause', function () { icPlay.hidden = false; icPause.hidden = true;  playToggle.setAttribute('aria-label', 'Play'); });
+      audio.addEventListener('timeupdate', function () { onTime(audio.currentTime); });
+      audio.addEventListener('ended', function () {
+        for (var i = 0; i < els.length; i++) els[i].classList.remove('active');
+        lastIdx = -2;
+      });
+
+      function seekTo(clientX) {
+        var rect = track.getBoundingClientRect();
+        var ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+        begin();
+        audio.currentTime = ratio * duration;
+        onTime(audio.currentTime);
+      }
+
+      var dragging = false;
+      track.addEventListener('mousedown', function (e) { dragging = true; seekTo(e.clientX); e.preventDefault(); });
+      window.addEventListener('mousemove', function (e) { if (dragging) seekTo(e.clientX); });
+      window.addEventListener('mouseup',   function () { dragging = false; });
+      track.addEventListener('touchstart', function (e) { seekTo(e.touches[0].clientX); }, { passive: true });
+      track.addEventListener('touchmove',  function (e) { seekTo(e.touches[0].clientX); }, { passive: true });
+      track.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowRight')      { begin(); audio.currentTime = Math.min(duration, audio.currentTime + 5); onTime(audio.currentTime); e.preventDefault(); }
+        else if (e.key === 'ArrowLeft')  { begin(); audio.currentTime = Math.max(0, audio.currentTime - 5); onTime(audio.currentTime); e.preventDefault(); }
+        else if (e.key === ' ' || e.key === 'Enter') { toggle(); e.preventDefault(); }
       });
     }
   })();
