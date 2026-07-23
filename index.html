@@ -568,11 +568,36 @@
      If timings can't be fetched (e.g. opened via file://, where fetch() is
      blocked by CORS), the plain <audio controls> fallback stays visible. */
   (function () {
-    var AUDIO_SRC   = 'audio/demo-audio.mp3';
-    var TIMINGS_URL = 'audio/demo-timings.json';
+    // Niche → demo file map. Add one entry per new vertical — no other changes needed.
+    var DEMO_VARIANTS = [
+      {
+        pattern: /dental|dentist|orthodontist|endodontist|periodontist|oral[\s-]?surgeon/i,
+        audio:   'audio/demo-dental.mp3',
+        timings: 'audio/demo-dental-timings.json'
+      }
+    ];
+
+    var _nq = (new URLSearchParams(window.location.search).get('niche') || '').trim();
+    var _dv = null;
+    for (var _di = 0; _di < DEMO_VARIANTS.length; _di++) {
+      if (DEMO_VARIANTS[_di].pattern.test(_nq)) { _dv = DEMO_VARIANTS[_di]; break; }
+    }
+
+    var AUDIO_SRC   = _dv ? _dv.audio   : 'audio/demo-audio.mp3';
+    var TIMINGS_URL = _dv ? _dv.timings : 'audio/demo-timings.json';
 
     var interactive = document.getElementById('demoInteractive');
     var fallback    = document.getElementById('demoFallback');
+
+    // Keep the fallback <audio> source in sync with the selected niche demo
+    if (_dv && fallback) {
+      var _fa = fallback.querySelector('audio');
+      if (_fa) {
+        var _fs = _fa.querySelector('source');
+        if (_fs) { _fs.src = AUDIO_SRC; _fa.load(); }
+        else { _fa.src = AUDIO_SRC; }
+      }
+    }
 
     // Demo-played tracking pixel — fires ONCE per page view no matter which
     // player the visitor ends up on (the synced-transcript player below, or

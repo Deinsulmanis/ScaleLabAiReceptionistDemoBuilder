@@ -1,0 +1,17 @@
+{
+  "name": "scale-lab-demo-generator",
+  "version": "1.0.0",
+  "description": "TTS demo audio generator for ScaleLab AI receptionist proposal",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "generate:dental": "node generate-demo-audio.js dental",
+    "generate:all": "node generate-demo-audio.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "fluent-ffmpeg": "^2.1.3",
+    "music-metadata": "^7.14.0"
+  }
+}
