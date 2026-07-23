@@ -735,5 +735,81 @@
     }
   })();
 </script>
+
+<script>
+  /* Scroll-depth + time-on-page engagement tracking. GA4 gets every
+     milestone (matching the existing proposal_viewed pattern); the /engaged
+     pixel fires ONCE per page view, only on the single highest-intent signal
+     (100% scroll or 120s ACTIVE time — not wall-clock), to its own sheet so
+     it can never be mistaken for an open or a demo play and false-trigger a
+     warm follow-up. Reads company/niche fresh, same as the demo-play pixel —
+     this is its own scope and shares nothing with the other script blocks. */
+  (function () {
+    var q       = new URLSearchParams(window.location.search);
+    var company = (q.get('company') || '').trim();
+    var niche   = (q.get('niche')   || '').trim();
+
+    function ga(name, params) {
+      if (typeof gtag === 'function') gtag('event', name, params);
+    }
+
+    var engagedLogged = false;
+    function logEngaged(signal) {
+      if (engagedLogged) return;
+      engagedLogged = true;
+      var qs = 'company=' + encodeURIComponent(company || '(none)') +
+               '&niche='   + encodeURIComponent(niche   || '(none)') +
+               '&signal='  + encodeURIComponent(signal);
+      new Image().src = 'https://receptionist.scalelabai.ca/engaged?' + qs;
+    }
+
+    // ── Scroll depth: 25/50/75/100%, each once, rAF-throttled ─────────────
+    var scrollFired  = { 25: false, 50: false, 75: false, 100: false };
+    var scrollTicking = false;
+    var raf = window.requestAnimationFrame || function (fn) { fn(); };
+
+    function checkScroll() {
+      scrollTicking = false;
+      var doc = document.documentElement;
+      var maxScroll = doc.scrollHeight - doc.clientHeight;
+      if (maxScroll <= 0) return; // page fits in viewport — nothing to scroll
+      var pct = (window.pageYOffset || doc.scrollTop) / maxScroll * 100;
+      [25, 50, 75, 100].forEach(function (m) {
+        if (!scrollFired[m] && pct >= m) {
+          scrollFired[m] = true;
+          ga('scroll_depth', { percent: m, company: company || '(none)', niche: niche || '(none)' });
+          if (m === 100) logEngaged('scroll_100');
+        }
+      });
+    }
+
+    window.addEventListener('scroll', function () {
+      if (scrollTicking) return;
+      scrollTicking = true;
+      raf(checkScroll);
+    }, { passive: true });
+
+    checkScroll(); // covers a proposal short enough to need no scrolling at all
+
+    // ── Time on page: 30s / 120s of ACTIVE time, each once ─────────────────
+    // Checking document.visibilityState on every tick pauses accumulation
+    // while the tab is hidden — the same outcome a visibilitychange listener
+    // would give, without the start/stop bookkeeping that approach needs.
+    var activeSeconds = 0;
+    var timeFired = { 30: false, 120: false };
+    var timer = setInterval(function () {
+      if (document.visibilityState !== 'visible') return;
+      activeSeconds++;
+      [30, 120].forEach(function (t) {
+        if (!timeFired[t] && activeSeconds >= t) {
+          timeFired[t] = true;
+          ga('time_on_page', { seconds: t, company: company || '(none)', niche: niche || '(none)' });
+          if (t === 120) logEngaged('time_120');
+        }
+      });
+      if (timeFired[30] && timeFired[120]) clearInterval(timer);
+    }, 1000);
+  })();
+</script>
 </body>
 </html>
