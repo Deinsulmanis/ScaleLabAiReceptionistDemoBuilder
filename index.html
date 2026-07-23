@@ -578,6 +578,29 @@
 
     var interactive = document.getElementById('demoInteractive');
     var fallback    = document.getElementById('demoFallback');
+
+    // Demo-played tracking pixel — fires ONCE per page view no matter which
+    // player the visitor ends up on (the synced-transcript player below, or
+    // the plain <audio controls> fallback if the timings fetch fails). Placed
+    // ahead of the window.fetch guard so the fallback stays tracked even in a
+    // browser too old to run the enhanced player at all. company/niche are
+    // read fresh here — this IIFE doesn't share scope with the earlier script
+    // block that first parsed them.
+    var demoPlayLogged = false;
+    function logDemoPlayed() {
+      if (demoPlayLogged) return;
+      demoPlayLogged = true;
+      var q  = new URLSearchParams(window.location.search);
+      var co = (q.get('company') || '').trim();
+      var nc = (q.get('niche')   || '').trim();
+      var qs = 'company=' + encodeURIComponent(co) + (nc ? '&niche=' + encodeURIComponent(nc) : '');
+      new Image().src = 'https://receptionist.scalelabai.ca/demo-played?' + qs;
+    }
+    if (fallback) {
+      var fallbackAudio = fallback.querySelector('audio');
+      if (fallbackAudio) fallbackAudio.addEventListener('play', logDemoPlayed, { once: true });
+    }
+
     if (!interactive || !fallback || !window.fetch) return;
 
     fetch(TIMINGS_URL)
@@ -682,7 +705,7 @@
       overlayPlay.addEventListener('click', function (e) { e.stopPropagation(); play(); });
       playToggle.addEventListener('click', toggle);
 
-      audio.addEventListener('play',  function () { icPlay.hidden = true;  icPause.hidden = false; playToggle.setAttribute('aria-label', 'Pause'); });
+      audio.addEventListener('play',  function () { icPlay.hidden = true;  icPause.hidden = false; playToggle.setAttribute('aria-label', 'Pause'); logDemoPlayed(); });
       audio.addEventListener('pause', function () { icPlay.hidden = false; icPause.hidden = true;  playToggle.setAttribute('aria-label', 'Play'); });
       audio.addEventListener('timeupdate', function () { onTime(audio.currentTime); });
       audio.addEventListener('ended', function () {
