@@ -13,7 +13,7 @@
  *   VERONICA_VOICE_ID=your_veronica_voice_id_here
  *
  * To add a new vertical: add an entry to DEMOS (and CONVERSATION_* array).
- * Primary concat: fluent-ffmpeg + ffmpeg binary on PATH (adds 0.4s silence gaps).
+ * Primary concat: ffmpeg via filter_complex (adds 0.4s silence gaps).
  * Fallback:       binary MP3 concat, 0-gap timings, console warning.
  *
  * Node >= 18 required (built-in fetch).
@@ -22,10 +22,10 @@
 'use strict';
 require('dotenv').config();
 
-const fs           = require('fs');
-const path         = require('path');
-const os           = require('os');
-const { execSync } = require('child_process');
+const fs                        = require('fs');
+const path                      = require('path');
+const os                        = require('os');
+const { execSync, spawnSync }   = require('child_process');
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 
@@ -122,31 +122,45 @@ function ffmpegAvailable() {
   catch (_) { return false; }
 }
 
+// Run ffmpeg with args as an array — avoids shell quoting issues on Windows.
+function runFfmpeg(args) {
+  const result = spawnSync('ffmpeg', args, { encoding: 'utf8' });
+  if (result.status !== 0) {
+    const msg = (result.stderr || result.stdout || '').slice(-1000);
+    throw new Error(`ffmpeg exited ${result.status}:\n${msg}`);
+  }
+}
+
 async function concatWithFfmpeg(clipPaths, gapS, outputPath) {
   const tmpDir      = fs.mkdtempSync(path.join(os.tmpdir(), 'scalelabdemo-'));
-  const silencePath = path.join(tmpDir, 'silence.mp3').replace(/\\/g, '/');
-  const listPath    = path.join(tmpDir, 'list.txt');
+  const silencePath = path.join(tmpDir, 'silence.mp3');
 
   try {
-    // Generate a silence clip for the gap
-    execSync(
-      `ffmpeg -y -f lavfi -i "anullsrc=r=44100:cl=mono" -t ${gapS} -c:a libmp3lame -q:a 9 "${silencePath}"`,
-      { stdio: ['ignore', 'ignore', 'ignore'] }
-    );
+    // Generate a 0.4s silence clip (used as gap between spoken lines)
+    runFfmpeg([
+      '-y', '-f', 'lavfi', '-i', 'anullsrc=r=44100:cl=mono',
+      '-t', String(gapS), '-c:a', 'libmp3lame', '-q:a', '9', silencePath,
+    ]);
 
-    // Build concat list: clip, silence, clip, silence, ..., clip
-    const entries = [];
+    // Build interleaved input list: clip0, silence, clip1, silence, ..., clipN
+    const parts = [];
     clipPaths.forEach((f, i) => {
-      entries.push(`file "${f.replace(/\\/g, '/')}"`);
-      if (i < clipPaths.length - 1) entries.push(`file "${silencePath}"`);
+      parts.push(f);
+      if (i < clipPaths.length - 1) parts.push(silencePath);
     });
-    fs.writeFileSync(listPath, entries.join('\n'));
 
-    const outNorm = outputPath.replace(/\\/g, '/');
-    execSync(
-      `ffmpeg -y -f concat -safe 0 -i "${listPath}" -c:a libmp3lame -b:a 128k "${outNorm}"`,
-      { stdio: ['ignore', 'ignore', 'ignore'] }
-    );
+    // filter_complex concat — avoids shell-quoting issues with path demuxer on Windows
+    const streams = parts.map((_, i) => `[${i}:a]`).join('');
+    const filter  = `${streams}concat=n=${parts.length}:v=0:a=1[out]`;
+    const iArgs   = parts.flatMap(f => ['-i', f]);
+
+    runFfmpeg([
+      '-y', ...iArgs,
+      '-filter_complex', filter,
+      '-map', '[out]',
+      '-c:a', 'libmp3lame', '-b:a', '128k',
+      outputPath,
+    ]);
   } finally {
     fs.rmSync(tmpDir, { recursive: true, force: true });
   }
@@ -192,10 +206,10 @@ async function generateDemo(name, config) {
 
     // Stitch audio
     if (useFfmpeg) {
-      console.log(`\n[${name}] Concatenating with ${gap}s gaps via ffmpeg…`);
+      console.log(`\n[${name}] Concatenating with ${gap}s gaps via ffmpeg...`);
       await concatWithFfmpeg(clipPaths, gap, output);
     } else {
-      console.log(`\n[${name}] Binary concat (0-gap)…`);
+      console.log(`\n[${name}] Binary concat (0-gap)...`);
       fs.writeFileSync(output, Buffer.concat(clipBuffers));
     }
 
@@ -212,7 +226,7 @@ async function generateDemo(name, config) {
     const timings       = { audio: audioRef, totalDuration, lines };
     fs.writeFileSync(timingsOut, JSON.stringify(timings, null, 2));
 
-    console.log(`\n[${name}] ✓ Done`);
+    console.log(`\n[${name}] Done.`);
     console.log(`  audio:    ${output}`);
     console.log(`  timings:  ${timingsOut}`);
     console.log(`  duration: ${totalDuration}s  (${Math.floor(totalDuration / 60)}:${String(Math.round(totalDuration % 60)).padStart(2, '0')})`);
@@ -242,7 +256,7 @@ async function main() {
     results.push(await generateDemo(name, config));
   }
 
-  console.log('\n── Summary ──────────────────────────────');
+  console.log('\n── Summary ─────────────────────────────────');
   results.forEach(r => console.log(`  ${r.name}: ${r.totalDuration}s, ${r.lineCount} lines`));
 }
 

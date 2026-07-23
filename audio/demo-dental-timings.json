@@ -1,0 +1,104 @@
+{
+  "audio": "demo-dental.mp3",
+  "totalDuration": 131.737,
+  "lines": [
+    {
+      "index": 0,
+      "speaker": "caller",
+      "text": "Hi, I'm looking for a new dentist — do you guys take new patients?",
+      "start": 0,
+      "end": 4.023
+    },
+    {
+      "index": 1,
+      "speaker": "veronica",
+      "text": "We do! We're taking new patients right now. Are you looking for a general cleaning and checkup, or is there something specific bothering you?",
+      "start": 4.423,
+      "end": 13.148
+    },
+    {
+      "index": 2,
+      "speaker": "caller",
+      "text": "Bit of both honestly. I haven't been in about three years and one of my molars has been sensitive to cold.",
+      "start": 13.548,
+      "end": 20.47
+    },
+    {
+      "index": 3,
+      "speaker": "veronica",
+      "text": "Okay, that's helpful. Sensitivity like that is worth having the dentist look at — it could be a few different things. I'd book you for a new patient exam with x-rays so they can see what's going on, and we can do the cleaning at the same visit.",
+      "start": 20.87,
+      "end": 37.484
+    },
+    {
+      "index": 4,
+      "speaker": "caller",
+      "text": "How much is that going to run me? I don't have insurance right now.",
+      "start": 37.884,
+      "end": 41.463
+    },
+    {
+      "index": 5,
+      "speaker": "veronica",
+      "text": "I can't quote you an exact number without the dentist seeing you, but I can tell you the new patient exam and x-rays are a set fee, and the office does offer payment plans if the treatment ends up being more involved. The front desk can walk you through the exact pricing when you come in.",
+      "start": 41.863,
+      "end": 61.22
+    },
+    {
+      "index": 6,
+      "speaker": "caller",
+      "text": "Wait — am I talking to a person right now, or is this some kind of AI?",
+      "start": 61.62,
+      "end": 66.244
+    },
+    {
+      "index": 7,
+      "speaker": "veronica",
+      "text": "I'm an AI assistant — I handle calls so nobody gets sent to voicemail. If you'd rather speak with someone from the team, I can take your number and have them call you back first thing. Whatever's easier for you.",
+      "start": 66.644,
+      "end": 81.638
+    },
+    {
+      "index": 8,
+      "speaker": "caller",
+      "text": "No, it's fine, you're actually pretty easy to deal with. What have you got available?",
+      "start": 82.038,
+      "end": 87.55
+    },
+    {
+      "index": 9,
+      "speaker": "veronica",
+      "text": "I've got Thursday at 2:40, or Friday morning at 9:15. Both are with Dr. Chen. Which works better?",
+      "start": 87.95,
+      "end": 94.899
+    },
+    {
+      "index": 10,
+      "speaker": "caller",
+      "text": "Friday morning works. But if the sensitivity gets worse before then, can I get in sooner?",
+      "start": 95.299,
+      "end": 100.732
+    },
+    {
+      "index": 11,
+      "speaker": "veronica",
+      "text": "Absolutely — if it starts to hurt more, call back and let us know it's urgent. We keep same-day slots open for that. Can I get your name and a good number for the confirmation?",
+      "start": 101.132,
+      "end": 112.234
+    },
+    {
+      "index": 12,
+      "speaker": "caller",
+      "text": "Yeah, it's Sarah Mitchell — 604-555-0182.",
+      "start": 112.634,
+      "end": 117.597
+    },
+    {
+      "index": 13,
+      "speaker": "veronica",
+      "text": "Perfect, thanks Sarah. You're booked for Friday at 9:15 with Dr. Chen — new patient exam, x-rays and cleaning. I'll text you a confirmation right now, and you'll get a reminder the day before. See you Friday!",
+      "start": 117.997,
+      "end": 131.737
+    }
+  ]
+}
