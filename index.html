@@ -361,7 +361,7 @@
       <div class="wrap">
         <div class="label">Hear it for yourself</div>
         <h2>This is what your callers hear</h2>
-        <p class="demo-sub">A 90-second demo call — simulated conversation showing how the AI receptionist handles a real inquiry and books an appointment.</p>
+        <p class="demo-sub" id="demoSub">A demo call — simulated conversation showing how the AI receptionist handles a real inquiry and books an appointment.</p>
         <div class="demo-player">
           <div class="demo-badge"><span class="dot"></span> Live AI Demo</div>
 
@@ -628,10 +628,20 @@
       .then(function (data) {
         if (!data || !Array.isArray(data.lines) || !data.lines.length) throw new Error('empty timings');
         init(data);
+        var demoSub = document.getElementById('demoSub');
+        if (demoSub && data.totalDuration) demoSub.textContent = fmtDemoDesc(data.totalDuration);
         fallback.hidden = true;
         interactive.hidden = false;
       })
       .catch(function () { /* keep the plain <audio> fallback visible */ });
+
+    function fmtDemoDesc(totalSecs) {
+      var s   = Math.round(totalSecs);
+      var dur = s < 100
+        ? (Math.round(s / 5) * 5) + '-second'
+        : Math.round(s / 60) + '-minute';
+      return 'A ' + dur + ' demo call — simulated conversation showing how the AI receptionist handles a real inquiry and books an appointment.';
+    }
 
     function fmt(t) {
       t = Math.max(0, Math.floor(t || 0));
