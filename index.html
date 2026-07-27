@@ -244,16 +244,44 @@
     -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
     cursor: pointer; text-align: center;
   }
-  .chat-overlay p { color: var(--muted); font-size: .9rem; }
   .chat-overlay.hidden { display: none; }
+
+  /* The single most important control on the page — the whole hero exists to
+     get this pressed. Large tap target, expanding ring to catch the eye, and
+     the payoff + time cost stated directly under it. */
   .overlay-play {
-    width: 66px; height: 66px; border-radius: 50%; border: none; cursor: pointer;
+    position: relative;
+    width: 88px; height: 88px; border-radius: 50%; border: none; cursor: pointer;
     background: linear-gradient(100deg, var(--cyan), var(--violet));
-    display: grid; place-items: center; box-shadow: 0 12px 34px rgba(34,211,238,.42);
-    transition: transform .18s ease;
+    display: grid; place-items: center;
+    box-shadow: 0 14px 40px rgba(34,211,238,.5);
+    transition: transform .18s ease, box-shadow .18s ease;
   }
-  .overlay-play:hover { transform: scale(1.06); }
-  .overlay-play svg { width: 26px; height: 26px; fill: #07101e; margin-left: 3px; }
+  .overlay-play::after {
+    content: ""; position: absolute; inset: -7px; border-radius: 50%;
+    border: 2px solid rgba(34,211,238,.55); pointer-events: none;
+    animation: playring 2.4s ease-out infinite;
+  }
+  @keyframes playring {
+    0%        { transform: scale(.92); opacity: .85; }
+    70%, 100% { transform: scale(1.3);  opacity: 0; }
+  }
+  .overlay-play:hover  { transform: scale(1.05); box-shadow: 0 18px 48px rgba(139,92,246,.55); }
+  .overlay-play:active { transform: scale(.98); }
+  .overlay-play:focus-visible { outline: 3px solid var(--cyan-soft); outline-offset: 5px; }
+  .overlay-play svg { width: 34px; height: 34px; fill: #07101e; margin-left: 4px; }
+
+  .overlay-label {
+    color: var(--ink); font-size: 1rem; font-weight: 600; letter-spacing: -0.01em;
+  }
+  /* Duration chip — populated only once the real length is known, so it can
+     never show a wrong number. Hidden until then rather than guessing. */
+  .overlay-len {
+    display: inline-block; font-size: .76rem; font-weight: 600;
+    color: var(--cyan-soft); background: rgba(34,211,238,.12);
+    border: 1px solid rgba(34,211,238,.32);
+    padding: 3px 11px; border-radius: 999px; letter-spacing: .02em;
+  }
 
   /* controls — revealed with the transcript on first play */
   .player-controls { display: none; align-items: center; gap: 14px; margin-top: 18px; padding: 0 2px; }
@@ -278,6 +306,25 @@
   /* graceful fallback */
   .demo-fallback audio { width: 100%; accent-color: var(--cyan); }
 
+  /* Scroll cue — tells the visitor who wants detail that the demo isn't the
+     whole page. Nudges downward so it reads as direction, not decoration. */
+  .scroll-cue {
+    position: relative; z-index: 2;
+    display: inline-flex; flex-direction: column; align-items: center; gap: 3px;
+    margin-top: 20px; text-decoration: none;
+    color: var(--muted-dim); font-size: 0.8rem; letter-spacing: 0.03em;
+    transition: color 0.2s ease;
+  }
+  .scroll-cue:hover, .scroll-cue:focus-visible { color: var(--cyan-soft); }
+  .scroll-cue svg {
+    width: 15px; height: 15px; fill: currentColor;
+    animation: nudge 2.1s ease-in-out infinite;
+  }
+  @keyframes nudge {
+    0%, 100% { transform: translateY(0);   opacity: 0.65; }
+    50%      { transform: translateY(4px); opacity: 1; }
+  }
+
   @media (max-width: 640px) {
     .demo-player.playing .chat-window { height: 300px; }
     .msg { max-width: 88%; }
@@ -289,6 +336,8 @@
     .msg.active { animation: none; }
     .chat-window { scroll-behavior: auto; transition: none; }
     .chat-shell { transition: none; }
+    .overlay-play::after { animation: none; opacity: .5; transform: none; }
+    .scroll-cue svg { animation: none; opacity: .8; }
   }
 
   /* cta */
@@ -360,7 +409,8 @@
               <button class="overlay-play" id="overlayPlay" aria-label="Play the demo call" type="button">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
               </button>
-              <p>Press play to hear a live call</p>
+              <p class="overlay-label">Hear it answer a real call</p>
+              <span class="overlay-len" id="demoLength" hidden></span>
             </div>
           </div>
           <div class="player-controls">
@@ -388,13 +438,19 @@
         </div>
       </div>
 
-      <p class="demo-sub" id="demoSub">A demo call — simulated conversation showing how the AI receptionist handles a real inquiry and books an appointment.</p>
+      <p class="demo-sub" id="demoSub">A simulated call — not a recording of a live customer.</p>
+
+      <a class="scroll-cue" href="#more">
+        <span>See how it works</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16.5 5.5 10h13z"/></svg>
+      </a>
+
       <p class="prepared">Prepared for <b data-field="company">your business</b><span data-field="contact-line"></span> · by Deins Ulmanis, ScaleLab AI</p>
     </div>
   </header>
 
   <main>
-    <section class="block">
+    <section class="block" id="more">
       <div class="wrap">
         <div class="label">The opportunity</div>
         <h2>Every missed call is a job that went to someone else</h2>
@@ -537,6 +593,17 @@
     var hv = document.querySelector('[data-field="hero-value"]');
     if (hv) hv.textContent = NICHE.value;
 
+    // Demo caption: states what the recording is (honest — it's simulated) and
+    // what it demonstrates, in this vertical's words. Carries no duration; that
+    // now sits on the play button. Uses the person noun rather than the booking
+    // noun: "books the booking" is what the booking noun produces for med spas.
+    var ds = document.getElementById('demoSub');
+    if (ds) {
+      ds.textContent = 'A simulated call — hear how it handles a real ' +
+        NICHE.person.replace(/s$/, '') +
+        ' inquiry and books them in. It is not a recording of an actual call.';
+    }
+
     // Opportunity opener — tailor with niche + call volume if provided.
     // The niche phrase comes from the NICHE table, never from the raw ?niche=
     // value: concatenating that produced "In Dentist business, calls come in
@@ -678,19 +745,24 @@
       .then(function (data) {
         if (!data || !Array.isArray(data.lines) || !data.lines.length) throw new Error('empty timings');
         init(data);
-        var demoSub = document.getElementById('demoSub');
-        if (demoSub && data.totalDuration) demoSub.textContent = fmtDemoDesc(data.totalDuration);
+        // Duration moves onto the play button itself, where it does persuasive
+        // work: it prices the click in seconds before the visitor commits.
+        var lenEl = document.getElementById('demoLength');
+        if (lenEl && data.totalDuration) {
+          lenEl.textContent = fmtDuration(data.totalDuration);
+          lenEl.hidden = false;
+        }
         fallback.hidden = true;
         interactive.hidden = false;
       })
       .catch(function () { /* keep the plain <audio> fallback visible */ });
 
-    function fmtDemoDesc(totalSecs) {
-      var s   = Math.round(totalSecs);
-      var dur = s < 100
-        ? (Math.round(s / 5) * 5) + '-second'
-        : Math.round(s / 60) + '-minute';
-      return 'A ' + dur + ' demo call — simulated conversation showing how the AI receptionist handles a real inquiry and books an appointment.';
+    // Compact length for the play-button chip: "90 sec" under 100s, "2 min"
+    // above it. Rounded to read as an easy commitment, never a precise 1:47.
+    function fmtDuration(totalSecs) {
+      var s = Math.round(totalSecs);
+      return s < 100 ? (Math.round(s / 5) * 5) + ' sec'
+                     : Math.round(s / 60) + ' min';
     }
 
     function fmt(t) {
