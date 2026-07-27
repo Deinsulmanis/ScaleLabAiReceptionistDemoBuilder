@@ -482,6 +482,7 @@
         key: 'dental',
         pattern: /dent(?:ist|al)|orthodont|endodont|periodont|oral[\s-]?surgeon/i,
         person: 'patients', booking: 'appointments', place: 'practice',
+        label: 'dental practice', labelPlural: 'dental practices',
         value: 'It answers every patient call, day or night, and books the appointment — so a new patient never lands in voicemail.',
         audio: 'audio/demo-dental.mp3', timings: 'audio/demo-dental-timings.json'
       },
@@ -489,6 +490,7 @@
         key: 'medspa',
         pattern: /med|spa|aesthetic|esthetic|clinic|skin|laser|dermat|wellness|massage|beauty|cosmetic/i,
         person: 'clients', booking: 'bookings', place: 'clinic',
+        label: 'med spa', labelPlural: 'med spas',
         value: 'It answers every client call, day or night, and books the appointment — so a new client never lands in voicemail.',
         audio: 'audio/demo-audio.mp3', timings: 'audio/demo-timings.json'
       },
@@ -496,6 +498,7 @@
         key: 'default',
         pattern: null,
         person: 'customers', booking: 'jobs', place: 'business',
+        label: 'business', labelPlural: 'service businesses',
         value: "It answers every call, day or night, and books the job — so the next ready-to-hire customer is yours, not a competitor's.",
         audio: 'audio/demo-audio.mp3', timings: 'audio/demo-timings.json'
       }
@@ -534,59 +537,66 @@
     var hv = document.querySelector('[data-field="hero-value"]');
     if (hv) hv.textContent = NICHE.value;
 
-    // Opportunity opener — tailor with niche + call volume if provided
+    // Opportunity opener — tailor with niche + call volume if provided.
+    // The niche phrase comes from the NICHE table, never from the raw ?niche=
+    // value: concatenating that produced "In Dentist business, calls come in
+    // all day". `default` keeps the static copy, since "In businesses," adds
+    // nothing over the generic line already in the HTML.
     var opp = document.querySelector('[data-field="opportunity-open"]');
     if (opp) {
-      var nichePhrase = niche ? niche + " business" : "business";
       if (calls) {
         opp.innerHTML = "You mentioned " + (company || "you") +
           " handles around <strong>" + calls + " calls a day</strong> — that's roughly <strong>" +
           (parseInt(calls, 10) * 30 || (calls + "0")) +
           " calls a month</strong>. Even answering more than most owners, the after-hours calls and the overflow when two ring at once still add up to dozens of missed opportunities.";
-      } else if (niche) {
-        opp.textContent = "In " + nichePhrase +
+      } else if (NICHE.key !== 'default') {
+        opp.textContent = "In " + NICHE.labelPlural +
           ", calls come in all day — and the ones that ring out while you're busy, on another line, or after hours don't wait around.";
       }
     }
 
-    // Med spa / clinic language swap for the below-fold copy. Resolved from the
-    // shared NICHE table rather than its own substring test, so this can't
-    // disagree with the hero copy or the audio. One behaviour change falls out
-    // of that: "dental clinic" now resolves to dental (the table is ordered) and
-    // no longer gets med-spa wording, which is a fix.
-    var isMedSpa = NICHE.key === 'medspa';
+    // Below-fold vocabulary swap. The static copy is written in trade language
+    // (job / customer / service business); for any niche that isn't `default`
+    // it's rewritten into that vertical's words, all pulled from the NICHE table.
+    //
+    // This used to run for med spas only, with the replacement words hardcoded.
+    // That left dentists reading "a single recovered job" and "calls to home and
+    // field service businesses" immediately under a hero that said "patients"
+    // and "appointment" — the same defect class as "In Dentist business", just
+    // below the fold. Driving it off the table fixes every niche at once and
+    // means a new vertical needs no code here.
+    if (NICHE.key !== 'default') {
+      var bookingPl = NICHE.booking;                    // appointments | bookings
+      var bookingSg = bookingPl.replace(/s$/, '');      // appointment  | booking
+      var personSg  = NICHE.person.replace(/s$/, '');   // patient      | client
+      var aBooking  = (/^[aeiou]/i.test(bookingSg) ? 'an ' : 'a ') + bookingSg;
 
-    if (isMedSpa) {
-      document.querySelectorAll('.cap p, .cap h4').forEach(function(el) {
+      document.querySelectorAll('.cap p, .cap h4').forEach(function (el) {
         el.innerHTML = el.innerHTML
-          .replace(/\bthe job\b/gi, 'the appointment')
-          .replace(/\ba job\b/gi, 'an appointment')
-          .replace(/\bjob\b/gi, 'appointment')
-          .replace(/\btrade\b/gi, 'practice');
+          .replace(/\bthe job\b/gi, 'the ' + bookingSg)
+          .replace(/\ba job\b/gi, aBooking)
+          .replace(/\bjobs\b/gi, bookingPl)
+          .replace(/\bjob\b/gi, bookingSg)
+          .replace(/\btrade\b/gi, NICHE.place);
       });
 
-      document.querySelectorAll('p.body, p.lead').forEach(function(el) {
+      document.querySelectorAll('p.body, p.lead').forEach(function (el) {
         el.innerHTML = el.innerHTML
-          .replace(/home and field service businesses/gi, 'medical aesthetic clinics')
-          .replace(/service businesses/gi, 'aesthetic clinics')
-          .replace(/a single recovered job/gi, 'a single recovered booking')
-          .replace(/ready-to-hire customer/gi, 'new client')
-          .replace(/\bthe job\b/gi, 'the appointment')
-          .replace(/\bjobs\b/gi, 'appointments')
-          .replace(/\btrade\b/gi, 'practice');
+          .replace(/home and field service businesses/gi, NICHE.labelPlural)
+          .replace(/service businesses/gi, NICHE.labelPlural)
+          .replace(/a single recovered job/gi, 'a single recovered ' + bookingSg)
+          .replace(/ready-to-hire customer/gi, 'new ' + personSg)
+          .replace(/\bcustomers\b/gi, NICHE.person)
+          .replace(/\bcustomer\b/gi, personSg)
+          .replace(/\bthe job\b/gi, 'the ' + bookingSg)
+          .replace(/\bjobs\b/gi, bookingPl)
+          .replace(/\btrade\b/gi, NICHE.place);
       });
 
-      // (The old `.hero .sub` rewrite lived here. The hero value line is now
-      // driven directly from NICHE.value above, so there's nothing to patch.)
-
-      document.querySelectorAll('h2').forEach(function(el) {
+      document.querySelectorAll('h2').forEach(function (el) {
         el.innerHTML = el.innerHTML
-          .replace(/a single recovered job/gi, 'a single recovered booking');
-      });
-
-      document.querySelectorAll('.cta-point').forEach(function(el) {
-        el.innerHTML = el.innerHTML
-          .replace(/in your trade/gi, 'for an aesthetic clinic');
+          .replace(/a single recovered job/gi, 'a single recovered ' + bookingSg)
+          .replace(/\ba job\b/gi, aBooking);
       });
     }
 
