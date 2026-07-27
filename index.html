@@ -202,7 +202,9 @@
     -webkit-mask-image: linear-gradient(to bottom, transparent, #000 20px, #000 calc(100% - 20px), transparent);
             mask-image: linear-gradient(to bottom, transparent, #000 20px, #000 calc(100% - 20px), transparent);
   }
-  .demo-player.playing .chat-window { height: 360px; padding: 6px 2px; }
+  /* Both classes required: `playing` alone (transcript still in flight, or the
+     fetch failed) must not open an empty 360px box. */
+  .demo-player.playing.has-transcript .chat-window { height: 360px; padding: 6px 2px; }
   .chat-window::-webkit-scrollbar { width: 6px; }
   .chat-window::-webkit-scrollbar-thumb { background: rgba(146,160,189,0.25); border-radius: 3px; }
 
@@ -326,7 +328,7 @@
   }
 
   @media (max-width: 640px) {
-    .demo-player.playing .chat-window { height: 300px; }
+    .demo-player.playing.has-transcript .chat-window { height: 300px; }
     .msg { max-width: 88%; }
     .time-display { min-width: 74px; font-size: .74rem; }
     .player-controls { gap: 10px; }
@@ -679,9 +681,17 @@
 </script>
 
 <script>
-  /* Synced transcript demo player — progressively enhances the demo section.
-     If timings can't be fetched (e.g. opened via file://, where fetch() is
-     blocked by CORS), the plain <audio controls> fallback stays visible. */
+  /* Synced transcript demo player.
+
+     Two independent layers, so a slow or failed network can never leave the
+     visitor looking at a broken or shifting player:
+       1. Playback — needs only the MP3. Painted and wired on the first frame.
+       2. Transcript — needs the timings JSON. Attaches whenever it arrives,
+          including mid-playback, and is simply absent if it never does.
+
+     The plain <audio controls> fallback is now only for browsers that run no
+     JS at all (or lack window.Audio); it is swapped out immediately otherwise
+     rather than after the fetch, which used to cause a visible paint-then-swap. */
   (function () {
     // Audio + timings come from the shared NICHE table (see the resolver script
     // above) — the same entry that supplied the hero copy, so the recording and
@@ -738,24 +748,128 @@
       if (fallbackAudio) fallbackAudio.addEventListener('play', logDemoPlayed, { once: true });
     }
 
-    if (!interactive || !fallback || !window.fetch) return;
+    // The enhanced player needs an <audio> element and the two containers.
+    // fetch() is NOT required here — it only fetches the transcript, which is
+    // an enhancement on top of a player that already works without it.
+    if (!interactive || !fallback || !window.Audio) return;
 
-    fetch(TIMINGS_URL)
-      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-      .then(function (data) {
-        if (!data || !Array.isArray(data.lines) || !data.lines.length) throw new Error('empty timings');
-        init(data);
-        // Duration moves onto the play button itself, where it does persuasive
-        // work: it prices the click in seconds before the visitor commits.
-        var lenEl = document.getElementById('demoLength');
-        if (lenEl && data.totalDuration) {
-          lenEl.textContent = fmtDuration(data.totalDuration);
-          lenEl.hidden = false;
-        }
-        fallback.hidden = true;
-        interactive.hidden = false;
-      })
-      .catch(function () { /* keep the plain <audio> fallback visible */ });
+    // ── Paint the real player on the first frame ──────────────────────────────
+    // This swap used to wait for the timings fetch, so on a slow connection the
+    // visitor watched the native <audio> bar paint and then get replaced. The
+    // MP3 is all playback needs, so the player is shown and fully wired now;
+    // the transcript and the duration chip attach later, if and when they land.
+    fallback.hidden    = true;
+    interactive.hidden = false;
+
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    var chatWindow  = document.getElementById('chatWindow');
+    var overlay     = document.getElementById('chatOverlay');
+    var overlayPlay = document.getElementById('overlayPlay');
+    var playToggle  = document.getElementById('playToggle');
+    var icPlay      = playToggle.querySelector('.ic-play');
+    var icPause     = playToggle.querySelector('.ic-pause');
+    var track       = document.getElementById('progressTrack');
+    var fill        = document.getElementById('progressFill');
+    var knob        = document.getElementById('progressKnob');
+    var timeDisplay = document.getElementById('timeDisplay');
+
+    var audio = new Audio();
+    audio.preload = 'metadata';
+    audio.src = AUDIO_SRC;
+
+    // Transcript state starts empty and is filled by attachTranscript(). Every
+    // function below is written to be correct while these are still empty, so
+    // pressing play before the timings land is a normal path, not an edge case.
+    var lines    = [];
+    var els      = [];
+    var duration = 0;   // whichever of audio metadata / timings arrives first
+    var started  = false;
+    var lastIdx  = -2;
+
+    updateProgress(0);
+
+    audio.addEventListener('loadedmetadata', function () {
+      if (isFinite(audio.duration) && audio.duration > 0) duration = audio.duration;
+      updateProgress(audio.currentTime);
+    });
+
+    // ── Controls: wired immediately, before any network work ─────────────────
+    overlay.addEventListener('click', play);
+    overlay.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { play(); e.preventDefault(); } });
+    overlayPlay.addEventListener('click', function (e) { e.stopPropagation(); play(); });
+    playToggle.addEventListener('click', toggle);
+
+    audio.addEventListener('play',  function () { icPlay.hidden = true;  icPause.hidden = false; playToggle.setAttribute('aria-label', 'Pause'); logDemoPlayed(); });
+    audio.addEventListener('pause', function () { icPlay.hidden = false; icPause.hidden = true;  playToggle.setAttribute('aria-label', 'Play'); });
+    audio.addEventListener('timeupdate', function () { onTime(audio.currentTime); });
+    audio.addEventListener('ended', function () {
+      for (var i = 0; i < els.length; i++) els[i].classList.remove('active');
+      lastIdx = -2;
+    });
+
+    var dragging = false;
+    track.addEventListener('mousedown', function (e) { dragging = true; seekTo(e.clientX); e.preventDefault(); });
+    window.addEventListener('mousemove', function (e) { if (dragging) seekTo(e.clientX); });
+    window.addEventListener('mouseup',   function () { dragging = false; });
+    track.addEventListener('touchstart', function (e) { seekTo(e.touches[0].clientX); }, { passive: true });
+    track.addEventListener('touchmove',  function (e) { seekTo(e.touches[0].clientX); }, { passive: true });
+    track.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight')      { begin(); audio.currentTime = Math.min(duration, audio.currentTime + 5); onTime(audio.currentTime); e.preventDefault(); }
+      else if (e.key === 'ArrowLeft')  { begin(); audio.currentTime = Math.max(0, audio.currentTime - 5); onTime(audio.currentTime); e.preventDefault(); }
+      else if (e.key === ' ' || e.key === 'Enter') { toggle(); e.preventDefault(); }
+    });
+
+    // ── Transcript: strictly an enhancement, fetched after the player is live ─
+    if (window.fetch) {
+      fetch(TIMINGS_URL)
+        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        .then(function (data) {
+          if (!data || !Array.isArray(data.lines) || !data.lines.length) throw new Error('empty timings');
+          attachTranscript(data);
+        })
+        .catch(function () { /* audio still plays — it just has no transcript */ });
+    }
+
+    // Safe to call at any point in playback, including mid-play: it renders the
+    // bubbles, then syncs straight to the current position.
+    function attachTranscript(data) {
+      lines = data.lines.slice().sort(function (a, b) { return a.start - b.start; });
+
+      els = lines.map(function (ln) {
+        var msg = document.createElement('div');
+        msg.className = 'msg ' + (ln.speaker === 'veronica' ? 'veronica' : 'caller') + (reduce ? '' : ' animate');
+        var who = document.createElement('div');
+        who.className = 'who';
+        who.textContent = ln.speaker === 'veronica' ? 'Veronica · AI Receptionist' : 'Caller';
+        var bubble = document.createElement('div');
+        bubble.className = 'bubble';
+        bubble.textContent = ln.text;
+        msg.appendChild(who); msg.appendChild(bubble);
+        chatWindow.appendChild(msg);
+        return msg;
+      });
+
+      if (!duration) duration = data.totalDuration || lines[lines.length - 1].end || 0;
+
+      // Duration chip — on the button, where it prices the click before the
+      // visitor commits. Only ever shown once the real length is known.
+      var lenEl = document.getElementById('demoLength');
+      if (lenEl && data.totalDuration) {
+        lenEl.textContent = fmtDuration(data.totalDuration);
+        lenEl.hidden = false;
+      }
+
+      // Gates the transcript panel opening: without this the card would expand
+      // to an empty 300px box if play was pressed before the timings arrived.
+      if (player) player.classList.add('has-transcript');
+
+      // Teaser: the first message peeks through behind the overlay before play.
+      if (!started) els[0].classList.add('show');
+
+      lastIdx = -2;
+      onTime(audio.currentTime);   // catches up if playback is already running
+    }
 
     // Compact length for the play-button chip: "90 sec" under 100s, "2 min"
     // above it. Rounded to read as an easy commitment, never a precise 1:47.
@@ -771,126 +885,57 @@
       return m + ':' + (s < 10 ? '0' : '') + s;
     }
 
-    function init(data) {
-      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      var lines  = data.lines.slice().sort(function (a, b) { return a.start - b.start; });
+    // Returns -1 while `lines` is empty, so renderMessages() is a no-op and
+    // playback before the transcript lands behaves normally.
+    function idxForTime(t) {
+      var idx = -1;
+      for (var i = 0; i < lines.length; i++) { if (t >= lines[i].start) idx = i; else break; }
+      return idx;
+    }
 
-      var chatWindow  = document.getElementById('chatWindow');
-      var overlay     = document.getElementById('chatOverlay');
-      var overlayPlay = document.getElementById('overlayPlay');
-      var playToggle  = document.getElementById('playToggle');
-      var icPlay      = playToggle.querySelector('.ic-play');
-      var icPause     = playToggle.querySelector('.ic-pause');
-      var track       = document.getElementById('progressTrack');
-      var fill        = document.getElementById('progressFill');
-      var knob        = document.getElementById('progressKnob');
-      var timeDisplay = document.getElementById('timeDisplay');
+    function updateProgress(t) {
+      var pct = duration ? Math.min(100, Math.max(0, (t / duration) * 100)) : 0;
+      fill.style.width = pct + '%';
+      knob.style.left = pct + '%';
+      track.setAttribute('aria-valuenow', Math.round(pct));
+      timeDisplay.textContent = fmt(t) + ' / ' + fmt(duration);
+    }
 
-      var audio = new Audio();
-      audio.preload = 'metadata';
-      audio.src = AUDIO_SRC;
-
-      var els = lines.map(function (ln) {
-        var msg = document.createElement('div');
-        msg.className = 'msg ' + (ln.speaker === 'veronica' ? 'veronica' : 'caller') + (reduce ? '' : ' animate');
-        var who = document.createElement('div');
-        who.className = 'who';
-        who.textContent = ln.speaker === 'veronica' ? 'Veronica · AI Receptionist' : 'Caller';
-        var bubble = document.createElement('div');
-        bubble.className = 'bubble';
-        bubble.textContent = ln.text;
-        msg.appendChild(who); msg.appendChild(bubble);
-        chatWindow.appendChild(msg);
-        return msg;
-      });
-
-      var duration = data.totalDuration || lines[lines.length - 1].end || 0;
-      var started = false, lastIdx = -2;
-
-      // Teaser: the first message peeks through behind the overlay before play.
-      els[0].classList.add('show');
-      updateProgress(0);
-
-      audio.addEventListener('loadedmetadata', function () {
-        if (isFinite(audio.duration) && audio.duration > 0) duration = audio.duration;
-        updateProgress(audio.currentTime);
-      });
-
-      function idxForTime(t) {
-        var idx = -1;
-        for (var i = 0; i < lines.length; i++) { if (t >= lines[i].start) idx = i; else break; }
-        return idx;
+    function renderMessages(idx) {
+      for (var i = 0; i < els.length; i++) {
+        els[i].classList.toggle('show', i <= idx);
+        els[i].classList.toggle('active', i === idx);
       }
-
-      function updateProgress(t) {
-        var pct = duration ? Math.min(100, Math.max(0, (t / duration) * 100)) : 0;
-        fill.style.width = pct + '%';
-        knob.style.left = pct + '%';
-        track.setAttribute('aria-valuenow', Math.round(pct));
-        timeDisplay.textContent = fmt(t) + ' / ' + fmt(duration);
+      if (idx >= 0) {
+        var el = els[idx];
+        var top = el.offsetTop - chatWindow.clientHeight / 2 + el.clientHeight / 2;
+        chatWindow.scrollTo({ top: Math.max(0, top), behavior: reduce ? 'auto' : 'smooth' });
       }
+    }
 
-      function renderMessages(idx) {
-        for (var i = 0; i < els.length; i++) {
-          els[i].classList.toggle('show', i <= idx);
-          els[i].classList.toggle('active', i === idx);
-        }
-        if (idx >= 0) {
-          var el = els[idx];
-          var top = el.offsetTop - chatWindow.clientHeight / 2 + el.clientHeight / 2;
-          chatWindow.scrollTo({ top: Math.max(0, top), behavior: reduce ? 'auto' : 'smooth' });
-        }
-      }
+    function onTime(t) {
+      var idx = idxForTime(t);
+      if (idx !== lastIdx) { renderMessages(idx); lastIdx = idx; }
+      updateProgress(t);
+    }
 
-      function onTime(t) {
-        var idx = idxForTime(t);
-        if (idx !== lastIdx) { renderMessages(idx); lastIdx = idx; }
-        updateProgress(t);
-      }
+    // First play expands the card: transcript + controls slide in. Pre-play the
+    // card is only the play affordance, which is what keeps it above the fold.
+    function begin() {
+      if (started) return;
+      started = true;
+      overlay.classList.add('hidden');
+      if (player) player.classList.add('playing');
+    }
+    function play()  { begin(); audio.play(); }
+    function toggle() { if (audio.paused) play(); else audio.pause(); }
 
-      // First play expands the card: transcript + controls slide in. Pre-play the
-      // card is only the play affordance, which is what keeps it above the fold.
-      function begin() {
-        if (started) return;
-        started = true;
-        overlay.classList.add('hidden');
-        if (player) player.classList.add('playing');
-      }
-      function play()  { begin(); audio.play(); }
-      function toggle() { if (audio.paused) play(); else audio.pause(); }
-
-      overlay.addEventListener('click', play);
-      overlay.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { play(); e.preventDefault(); } });
-      overlayPlay.addEventListener('click', function (e) { e.stopPropagation(); play(); });
-      playToggle.addEventListener('click', toggle);
-
-      audio.addEventListener('play',  function () { icPlay.hidden = true;  icPause.hidden = false; playToggle.setAttribute('aria-label', 'Pause'); logDemoPlayed(); });
-      audio.addEventListener('pause', function () { icPlay.hidden = false; icPause.hidden = true;  playToggle.setAttribute('aria-label', 'Play'); });
-      audio.addEventListener('timeupdate', function () { onTime(audio.currentTime); });
-      audio.addEventListener('ended', function () {
-        for (var i = 0; i < els.length; i++) els[i].classList.remove('active');
-        lastIdx = -2;
-      });
-
-      function seekTo(clientX) {
-        var rect = track.getBoundingClientRect();
-        var ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-        begin();
-        audio.currentTime = ratio * duration;
-        onTime(audio.currentTime);
-      }
-
-      var dragging = false;
-      track.addEventListener('mousedown', function (e) { dragging = true; seekTo(e.clientX); e.preventDefault(); });
-      window.addEventListener('mousemove', function (e) { if (dragging) seekTo(e.clientX); });
-      window.addEventListener('mouseup',   function () { dragging = false; });
-      track.addEventListener('touchstart', function (e) { seekTo(e.touches[0].clientX); }, { passive: true });
-      track.addEventListener('touchmove',  function (e) { seekTo(e.touches[0].clientX); }, { passive: true });
-      track.addEventListener('keydown', function (e) {
-        if (e.key === 'ArrowRight')      { begin(); audio.currentTime = Math.min(duration, audio.currentTime + 5); onTime(audio.currentTime); e.preventDefault(); }
-        else if (e.key === 'ArrowLeft')  { begin(); audio.currentTime = Math.max(0, audio.currentTime - 5); onTime(audio.currentTime); e.preventDefault(); }
-        else if (e.key === ' ' || e.key === 'Enter') { toggle(); e.preventDefault(); }
-      });
+    function seekTo(clientX) {
+      var rect = track.getBoundingClientRect();
+      var ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+      begin();
+      audio.currentTime = ratio * duration;
+      onTime(audio.currentTime);
     }
   })();
 </script>
