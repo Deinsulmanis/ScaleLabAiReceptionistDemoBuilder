@@ -1,111 +1,111 @@
 {
   "audio": "demo-citycentre-cosmetic.mp3",
-  "totalDuration": 97.646,
+  "totalDuration": 139.998,
   "lines": [
     {
       "index": 0,
       "speaker": "veronica",
-      "text": "Thanks for calling City Centre Dentistry, Dr. Mand's office — this is the front desk. How can I help you today?",
+      "text": "Thanks for calling City Centre Dentistry, Dr. Mannd's office — this is the front desk. How can I help you today?",
       "start": 0,
-      "end": 6.13
+      "end": 6.734
     },
     {
       "index": 1,
       "speaker": "caller",
-      "text": "Hi there — I've been thinking about getting Botox, and maybe Invisalign down the line. I just wanted to find out what that costs?",
-      "start": 6.53,
-      "end": 13.589
+      "text": "Hi there — so I've been thinking about getting Botox for a little while now, and honestly maybe Invisalign too somewhere down the road. I just wasn't sure what something like that usually costs, so I figured I'd call and ask before I got too far ahead of myself.",
+      "start": 7.134,
+      "end": 21.948
     },
     {
       "index": 2,
       "speaker": "veronica",
-      "text": "Absolutely — those are two of the things Dr. Mand does a lot of here at City Centre, so you've called the right place. Pricing really depends on your specific situation, so rather than give you a number that might be off, what we do is a free consultation — Dr. Mand takes a look, talks you through your options for both the Botox and the Invisalign, and gives you an exact estimate right there. No cost, no obligation. Would you like me to book that for you?",
-      "start": 13.989,
-      "end": 39.577
+      "text": "Absolutely — those are two of the things Dr. Mannd does a lot of here at City Centre, so you've definitely called the right place. Pricing really depends on your specific situation, so rather than give you a number that might be off, what we do is a free consultation — Dr. Mannd takes a look, walks you through your options for both the Botox and the Invisalign, and gives you an exact estimate right there. No cost, no obligation at all. Would you like me to get that booked for you?",
+      "start": 22.348,
+      "end": 47.89
     },
     {
       "index": 3,
       "speaker": "caller",
-      "text": "Oh nice, it's free? Yeah, let's do that.",
-      "start": 39.977,
-      "end": 42.485
+      "text": "Oh, it's actually free? That's great, yeah — I'd definitely like to come in for that. I didn't realize the consultation wouldn't cost anything, so that makes it a lot easier to just come check it out.",
+      "start": 48.29,
+      "end": 59.436
     },
     {
       "index": 4,
       "speaker": "veronica",
-      "text": "Great choice. Have you seen Dr. Mand before, or would this be your first time at City Centre?",
-      "start": 42.885,
-      "end": 47.715
+      "text": "Of course — no pressure at all, it's just a chance to get your questions answered. Have you seen Dr. Mannd before, or would this be your first time visiting City Centre?",
+      "start": 59.836,
+      "end": 68.752
     },
     {
       "index": 5,
       "speaker": "caller",
-      "text": "First time.",
-      "start": 48.115,
-      "end": 49.137
+      "text": "No, this would be my very first time — I've actually been looking for a new place for a while, so hopefully this works out.",
+      "start": 69.152,
+      "end": 76.118
     },
     {
       "index": 6,
       "speaker": "veronica",
-      "text": "Welcome — I'll get you set up as a new patient so everything's ready when you arrive. Can I start with your first and last name?",
-      "start": 49.537,
-      "end": 55.621
+      "text": "Well, welcome — I think you'll really like it here. I'll get you set up as a new patient so everything's ready when you arrive. Can I start with your first and last name?",
+      "start": 76.518,
+      "end": 84.97
     },
     {
       "index": 7,
       "speaker": "caller",
-      "text": "It's Jordan Lee.",
-      "start": 56.021,
-      "end": 57.275
+      "text": "Yeah, for sure — it's Jordan Lee.",
+      "start": 85.37,
+      "end": 87.924
     },
     {
       "index": 8,
       "speaker": "veronica",
-      "text": "Thanks, Jordan. And the best number to reach you at, in case we need to confirm anything before your visit?",
-      "start": 57.675,
-      "end": 63.016
+      "text": "Thanks, Jordan. And what's the best phone number to reach you at, just in case we need to confirm anything before your visit?",
+      "start": 88.324,
+      "end": 94.315
     },
     {
       "index": 9,
       "speaker": "caller",
-      "text": "It's 6 0 4... 5 5 5... 0 1 4 2.",
-      "start": 63.416,
-      "end": 68.06
+      "text": "Yeah, no problem — it's six oh four, five five five, oh one four two.",
+      "start": 94.715,
+      "end": 99.963
     },
     {
       "index": 10,
       "speaker": "veronica",
-      "text": "Perfect. Dr. Mand has a free consultation opening this Thursday at 2:30, or Friday morning at 10 — would either of those suit you?",
-      "start": 68.46,
-      "end": 75.844
+      "text": "Perfect, got it. Dr. Mannd has a free consultation opening this Thursday at 2:30, or Friday morning at 10 — would either of those work for you?",
+      "start": 100.363,
+      "end": 108.862
     },
     {
       "index": 11,
       "speaker": "caller",
-      "text": "Thursday at 2:30 works.",
-      "start": 76.244,
-      "end": 77.916
+      "text": "Um, Thursday at 2:30 would be great actually — that works really well with my schedule.",
+      "start": 109.262,
+      "end": 114.463
     },
     {
       "index": 12,
       "speaker": "veronica",
-      "text": "You're all set, Jordan — Thursday at 2:30 with Dr. Mand for a free consult on the Botox and Invisalign, and I've got you in as a new patient. We'll send a text reminder the day before. Anything else I can help you with?",
-      "start": 78.316,
-      "end": 90.112
+      "text": "Wonderful — you're all set, Jordan. Thursday at 2:30 with Dr. Mannd for a free consult on the Botox and Invisalign, and I've got you in our system as a new patient. We'll send you a text reminder the day before so you don't have to think about it. Is there anything else I can help you with?",
+      "start": 114.863,
+      "end": 130.142
     },
     {
       "index": 13,
       "speaker": "caller",
-      "text": "No, that's everything — thank you!",
-      "start": 90.512,
-      "end": 93.113
+      "text": "No, that's everything — thank you so much, I really appreciate your help.",
+      "start": 130.542,
+      "end": 135
     },
     {
       "index": 14,
       "speaker": "veronica",
       "text": "My pleasure, Jordan — we're looking forward to seeing you Thursday. Take care now!",
-      "start": 93.513,
-      "end": 97.646
+      "start": 135.4,
+      "end": 139.998
     }
   ]
 }

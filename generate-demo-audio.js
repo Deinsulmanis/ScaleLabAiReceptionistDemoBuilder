@@ -82,21 +82,27 @@ const CONVERSATION_CITYCENTRE_EMERGENCY = [
   { speaker: 'veronica', text: "Of course, Sam — help's on the way." },
 ];
 
+// Revised take. Two deliberate spellings here are pronunciation controls for
+// the TTS, not typos — do not "correct" them:
+//   "Dr. Mannd"  — the double n stops the voice clipping the name short.
+//   the phone number is spelled out as words ("six oh four, five five five...")
+//   rather than digits, which the voice otherwise reads as "six hundred four".
+// Caller turns are also longer and less clipped than the first take.
 const CONVERSATION_CITYCENTRE_COSMETIC = [
-  { speaker: 'veronica', text: "Thanks for calling City Centre Dentistry, Dr. Mand's office — this is the front desk. How can I help you today?" },
-  { speaker: 'caller',   text: "Hi there — I've been thinking about getting Botox, and maybe Invisalign down the line. I just wanted to find out what that costs?" },
-  { speaker: 'veronica', text: "Absolutely — those are two of the things Dr. Mand does a lot of here at City Centre, so you've called the right place. Pricing really depends on your specific situation, so rather than give you a number that might be off, what we do is a free consultation — Dr. Mand takes a look, talks you through your options for both the Botox and the Invisalign, and gives you an exact estimate right there. No cost, no obligation. Would you like me to book that for you?" },
-  { speaker: 'caller',   text: "Oh nice, it's free? Yeah, let's do that." },
-  { speaker: 'veronica', text: "Great choice. Have you seen Dr. Mand before, or would this be your first time at City Centre?" },
-  { speaker: 'caller',   text: "First time." },
-  { speaker: 'veronica', text: "Welcome — I'll get you set up as a new patient so everything's ready when you arrive. Can I start with your first and last name?" },
-  { speaker: 'caller',   text: "It's Jordan Lee." },
-  { speaker: 'veronica', text: "Thanks, Jordan. And the best number to reach you at, in case we need to confirm anything before your visit?" },
-  { speaker: 'caller',   text: "It's 6 0 4... 5 5 5... 0 1 4 2." },
-  { speaker: 'veronica', text: "Perfect. Dr. Mand has a free consultation opening this Thursday at 2:30, or Friday morning at 10 — would either of those suit you?" },
-  { speaker: 'caller',   text: "Thursday at 2:30 works." },
-  { speaker: 'veronica', text: "You're all set, Jordan — Thursday at 2:30 with Dr. Mand for a free consult on the Botox and Invisalign, and I've got you in as a new patient. We'll send a text reminder the day before. Anything else I can help you with?" },
-  { speaker: 'caller',   text: "No, that's everything — thank you!" },
+  { speaker: 'veronica', text: "Thanks for calling City Centre Dentistry, Dr. Mannd's office — this is the front desk. How can I help you today?" },
+  { speaker: 'caller',   text: "Hi there — so I've been thinking about getting Botox for a little while now, and honestly maybe Invisalign too somewhere down the road. I just wasn't sure what something like that usually costs, so I figured I'd call and ask before I got too far ahead of myself." },
+  { speaker: 'veronica', text: "Absolutely — those are two of the things Dr. Mannd does a lot of here at City Centre, so you've definitely called the right place. Pricing really depends on your specific situation, so rather than give you a number that might be off, what we do is a free consultation — Dr. Mannd takes a look, walks you through your options for both the Botox and the Invisalign, and gives you an exact estimate right there. No cost, no obligation at all. Would you like me to get that booked for you?" },
+  { speaker: 'caller',   text: "Oh, it's actually free? That's great, yeah — I'd definitely like to come in for that. I didn't realize the consultation wouldn't cost anything, so that makes it a lot easier to just come check it out." },
+  { speaker: 'veronica', text: "Of course — no pressure at all, it's just a chance to get your questions answered. Have you seen Dr. Mannd before, or would this be your first time visiting City Centre?" },
+  { speaker: 'caller',   text: "No, this would be my very first time — I've actually been looking for a new place for a while, so hopefully this works out." },
+  { speaker: 'veronica', text: "Well, welcome — I think you'll really like it here. I'll get you set up as a new patient so everything's ready when you arrive. Can I start with your first and last name?" },
+  { speaker: 'caller',   text: "Yeah, for sure — it's Jordan Lee." },
+  { speaker: 'veronica', text: "Thanks, Jordan. And what's the best phone number to reach you at, just in case we need to confirm anything before your visit?" },
+  { speaker: 'caller',   text: "Yeah, no problem — it's six oh four, five five five, oh one four two." },
+  { speaker: 'veronica', text: "Perfect, got it. Dr. Mannd has a free consultation opening this Thursday at 2:30, or Friday morning at 10 — would either of those work for you?" },
+  { speaker: 'caller',   text: "Um, Thursday at 2:30 would be great actually — that works really well with my schedule." },
+  { speaker: 'veronica', text: "Wonderful — you're all set, Jordan. Thursday at 2:30 with Dr. Mannd for a free consult on the Botox and Invisalign, and I've got you in our system as a new patient. We'll send you a text reminder the day before so you don't have to think about it. Is there anything else I can help you with?" },
+  { speaker: 'caller',   text: "No, that's everything — thank you so much, I really appreciate your help." },
   { speaker: 'veronica', text: "My pleasure, Jordan — we're looking forward to seeing you Thursday. Take care now!" },
 ];
 
