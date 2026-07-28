@@ -82,8 +82,19 @@ const CONVERSATION_CITYCENTRE_EMERGENCY = [
   { speaker: 'caller',   text: "Yeah, it's Sam Carter — six oh four, five five five, oh one eight eight." },
   { speaker: 'veronica', text: "Thank you, Sam. I've flagged this as an emergency and I'm notifying Dr. Mannd's team right now so someone can get you seen as soon as possible today. In the meantime, if the pain worsens or you notice any swelling, please don't wait — let us know. Someone will be calling you back within a few minutes. Hang in there, okay?" },
   { speaker: 'caller',   text: "Okay, thank you so much." },
-  { speaker: 'veronica', text: "Of course, Sam — help's on the way." },
+  // Closing line removed: "Of course, Sam — help's on the way." reads as
+  // emergency services, not a dental front desk. The call now ends on the
+  // caller thanking them.
 ];
+
+// WARNING — the shipped demo-citycentre-emergency.mp3 is NOT a plain output of
+// this script. The generated take had 4.03s of dead air inside turn 2, which
+// was cut by hand, and the closing turn was trimmed off the end. The timings
+// JSON was then rebuilt from the edited audio, not from clip durations.
+// Re-running `node generate-demo-audio.js citycentre-emergency` WILL overwrite
+// both files with a fresh TTS take that does not contain those edits — and TTS
+// is non-deterministic, so the dead air may or may not come back. Listen before
+// shipping any regenerated version.
 
 // Revised take. Two deliberate spellings here are pronunciation controls for
 // the TTS, not typos — do not "correct" them:
