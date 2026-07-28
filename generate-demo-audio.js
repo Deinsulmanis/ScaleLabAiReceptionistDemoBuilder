@@ -29,14 +29,18 @@ const { execSync, spawnSync }   = require('child_process');
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 
-const API_KEY        = process.env.ELEVENLABS_API_KEY;
-const VOICE_CALLER   = '8DzKSPdgEQPaK5vKG0Rs';
-const VOICE_VERONICA = process.env.VERONICA_VOICE_ID;
-const EL_MODEL       = 'eleven_turbo_v2_5';
-const GAP_S          = 0.4;  // silence gap between lines when ffmpeg is available
+const API_KEY  = process.env.ELEVENLABS_API_KEY;
+const EL_MODEL = 'eleven_turbo_v2_5';
+const GAP_S    = 0.4;  // silence gap between lines when ffmpeg is available
 
-if (!API_KEY)        { console.error('[ERROR] ELEVENLABS_API_KEY missing from .env'); process.exit(1); }
-if (!VOICE_VERONICA) { console.error('[ERROR] VERONICA_VOICE_ID missing from .env');  process.exit(1); }
+// Default voice pair, used by any demo that doesn't declare its own `voices`.
+// Keyed by the speaker field in the conversation arrays.
+const DEFAULT_VOICES = {
+  veronica: process.env.VERONICA_VOICE_ID,   // the AI receptionist
+  caller:   '8DzKSPdgEQPaK5vKG0Rs',
+};
+
+if (!API_KEY) { console.error('[ERROR] ELEVENLABS_API_KEY missing from .env'); process.exit(1); }
 
 // ─── Conversations ────────────────────────────────────────────────────────────
 
@@ -63,14 +67,75 @@ const CONVERSATION_DENTAL = [
 //   ... (14 lines)
 // ];
 
+// ── Custom demos: City Centre Dentistry (Surrey) ─────────────────────────────
+// Lead-specific, built from scripts supplied verbatim. `veronica` is the
+// speaker key for the AI receptionist — see the note in DEMOS below; the key
+// name, not the voice ID, is what the proposal page keys its labels off.
+
+const CONVERSATION_CITYCENTRE_EMERGENCY = [
+  { speaker: 'veronica', text: "Thanks for calling City Centre Dentistry, Dr. Mand's office — this is the front desk. How can I help you today?" },
+  { speaker: 'caller',   text: "Hi — I think I might have a dental emergency? I chipped a tooth pretty badly this morning and it's really hurting." },
+  { speaker: 'veronica', text: "Oh no — I'm sorry to hear that, let's get you looked after right away. A chipped tooth with pain is something we treat as urgent, so I'm going to flag this for the team immediately. Can I get your name and a number to reach you?" },
+  { speaker: 'caller',   text: "Yeah, it's Sam Carter — 6 0 4... 5 5 5... 0 1 8 8." },
+  { speaker: 'veronica', text: "Thank you, Sam. I've flagged this as an emergency and I'm notifying Dr. Mand's team right now so someone can get you seen as soon as possible today. In the meantime, if the pain worsens or you notice any swelling, please don't wait — let us know. Someone will be calling you back within a few minutes. Hang in there, okay?" },
+  { speaker: 'caller',   text: "Okay, thank you so much." },
+  { speaker: 'veronica', text: "Of course, Sam — help's on the way." },
+];
+
+const CONVERSATION_CITYCENTRE_COSMETIC = [
+  { speaker: 'veronica', text: "Thanks for calling City Centre Dentistry, Dr. Mand's office — this is the front desk. How can I help you today?" },
+  { speaker: 'caller',   text: "Hi there — I've been thinking about getting Botox, and maybe Invisalign down the line. I just wanted to find out what that costs?" },
+  { speaker: 'veronica', text: "Absolutely — those are two of the things Dr. Mand does a lot of here at City Centre, so you've called the right place. Pricing really depends on your specific situation, so rather than give you a number that might be off, what we do is a free consultation — Dr. Mand takes a look, talks you through your options for both the Botox and the Invisalign, and gives you an exact estimate right there. No cost, no obligation. Would you like me to book that for you?" },
+  { speaker: 'caller',   text: "Oh nice, it's free? Yeah, let's do that." },
+  { speaker: 'veronica', text: "Great choice. Have you seen Dr. Mand before, or would this be your first time at City Centre?" },
+  { speaker: 'caller',   text: "First time." },
+  { speaker: 'veronica', text: "Welcome — I'll get you set up as a new patient so everything's ready when you arrive. Can I start with your first and last name?" },
+  { speaker: 'caller',   text: "It's Jordan Lee." },
+  { speaker: 'veronica', text: "Thanks, Jordan. And the best number to reach you at, in case we need to confirm anything before your visit?" },
+  { speaker: 'caller',   text: "It's 6 0 4... 5 5 5... 0 1 4 2." },
+  { speaker: 'veronica', text: "Perfect. Dr. Mand has a free consultation opening this Thursday at 2:30, or Friday morning at 10 — would either of those suit you?" },
+  { speaker: 'caller',   text: "Thursday at 2:30 works." },
+  { speaker: 'veronica', text: "You're all set, Jordan — Thursday at 2:30 with Dr. Mand for a free consult on the Botox and Invisalign, and I've got you in as a new patient. We'll send a text reminder the day before. Anything else I can help you with?" },
+  { speaker: 'caller',   text: "No, that's everything — thank you!" },
+  { speaker: 'veronica', text: "My pleasure, Jordan — we're looking forward to seeing you Thursday. Take care now!" },
+];
+
+// Voice pair for the City Centre demos, supplied for this lead.
+const VOICES_CITYCENTRE = {
+  veronica: 'xYa75LlayhWHCRl1yJSH',   // receptionist / the AI
+  caller:   '3T3dPoABJjGZZAI1eif7',   // caller
+};
+
 // ─── Demo config — add new verticals here ────────────────────────────────────
 
+// NOTE on the `veronica` speaker key: it is the AI-receptionist ROLE, not the
+// voice. index.html labels bubbles with
+//   ln.speaker === 'veronica' ? 'Veronica · AI Receptionist' : 'Caller'
+// so a conversation must use exactly 'veronica' / 'caller' to render correctly,
+// regardless of which voice ID actually speaks the lines. Renaming the key to
+// 'receptionist' would silently label those bubbles "Caller".
 const DEMOS = {
   dental: {
     conversation: CONVERSATION_DENTAL,
     output:       path.join(__dirname, 'audio', 'demo-dental.mp3'),
     timingsOut:   path.join(__dirname, 'audio', 'demo-dental-timings.json'),
     audioRef:     'demo-dental.mp3',
+  },
+
+  'citycentre-emergency': {
+    conversation: CONVERSATION_CITYCENTRE_EMERGENCY,
+    voices:       VOICES_CITYCENTRE,
+    output:       path.join(__dirname, 'audio', 'demo-citycentre-emergency.mp3'),
+    timingsOut:   path.join(__dirname, 'audio', 'demo-citycentre-emergency-timings.json'),
+    audioRef:     'demo-citycentre-emergency.mp3',
+  },
+
+  'citycentre-cosmetic': {
+    conversation: CONVERSATION_CITYCENTRE_COSMETIC,
+    voices:       VOICES_CITYCENTRE,
+    output:       path.join(__dirname, 'audio', 'demo-citycentre-cosmetic.mp3'),
+    timingsOut:   path.join(__dirname, 'audio', 'demo-citycentre-cosmetic-timings.json'),
+    audioRef:     'demo-citycentre-cosmetic.mp3',
   },
   // medspa: {
   //   conversation: CONVERSATION_MEDSPA,
@@ -105,14 +170,33 @@ async function synthesizeLine(text, voiceId) {
 
 // ─── Duration parsing ─────────────────────────────────────────────────────────
 
-async function getBufferDuration(buf) {
+// Measures the DECODED length of a clip file with ffprobe.
+//
+// This must not use the MP3 header (music-metadata et al): ffmpeg's concat
+// filter decodes every input to PCM and joins the samples, so what lands in the
+// output is the decoded length, which differs from the header estimate by the
+// encoder delay/padding on each clip. Header-based measurement made the timings
+// run ~0.6% long, and because the error is per-clip it accumulated — the last
+// transcript bubble in a 15-line demo fired ~0.6s before the audio reached it.
+async function getClipDuration(file) {
+  const r = spawnSync('ffprobe', [
+    '-v', 'error',
+    '-select_streams', 'a:0',
+    '-show_entries', 'format=duration',
+    '-of', 'default=noprint_wrappers=1:nokey=1',
+    file,
+  ], { encoding: 'utf8' });
+
+  const d = parseFloat((r.stdout || '').trim());
+  if (r.status === 0 && isFinite(d) && d > 0) return d;
+
+  // Fallback if ffprobe is unavailable: header estimate, drift and all.
   try {
     const mm   = require('music-metadata');
-    const meta = await mm.parseBuffer(buf, { mimeType: 'audio/mpeg' });
+    const meta = await mm.parseBuffer(fs.readFileSync(file), { mimeType: 'audio/mpeg' });
     if (meta.format.duration > 0) return meta.format.duration;
   } catch (_) {}
-  // Rough fallback: assumes ~128 kbps
-  return buf.length / 16000;
+  return fs.statSync(file).size / 16000;
 }
 
 // ─── Concat with ffmpeg ───────────────────────────────────────────────────────
@@ -170,6 +254,7 @@ async function concatWithFfmpeg(clipPaths, gapS, outputPath) {
 
 async function generateDemo(name, config) {
   const { conversation, output, timingsOut, audioRef } = config;
+  const voices    = config.voices || DEFAULT_VOICES;
   const useFfmpeg = ffmpegAvailable();
 
   if (!useFfmpeg) {
@@ -189,14 +274,15 @@ async function generateDemo(name, config) {
 
     for (let i = 0; i < conversation.length; i++) {
       const { speaker, text } = conversation[i];
-      const voiceId = speaker === 'veronica' ? VOICE_VERONICA : VOICE_CALLER;
-      const preview = text.length > 60 ? text.slice(0, 60) + '…' : text;
-      process.stdout.write(`  [${String(i + 1).padStart(2)}/${conversation.length}] ${speaker.padEnd(8)} ${preview} `);
+      const voiceId = voices[speaker];
+      if (!voiceId) throw new Error(`No voice ID configured for speaker "${speaker}" in demo "${name}"`);
+      const preview = text.length > 52 ? text.slice(0, 52) + '…' : text;
+      process.stdout.write(`  [${String(i + 1).padStart(2)}/${conversation.length}] ${speaker.padEnd(9)} ${voiceId.slice(0, 8)}… ${preview} `);
 
       const buf  = await synthesizeLine(text, voiceId);
-      const dur  = await getBufferDuration(buf);
       const file = path.join(tmpDir, `clip_${String(i).padStart(3, '0')}.mp3`);
       fs.writeFileSync(file, buf);
+      const dur = await getClipDuration(file);   // decoded length, see note above
 
       clipPaths.push(file);
       clipBuffers.push(buf);
