@@ -310,6 +310,12 @@ async function generateDemo(name, config) {
 
     const totalDuration = parseFloat((cursor - gap).toFixed(3));
     const timings       = { audio: audioRef, totalDuration, lines };
+
+    // Optional per-demo transcript labels. Omitted by default: the page already
+    // defaults the `veronica` key to "AI Receptionist", so only a demo that
+    // wants a *named* persona needs to emit this.
+    if (config.speakerLabels) timings.speakerLabels = config.speakerLabels;
+
     fs.writeFileSync(timingsOut, JSON.stringify(timings, null, 2));
 
     console.log(`\n[${name}] Done.`);

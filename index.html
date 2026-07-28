@@ -699,6 +699,10 @@
     var AUDIO_SRC   = NICHE.audio;
     var TIMINGS_URL = NICHE.timings;
 
+    // Default transcript bubble labels, by speaker key. Overridable per demo
+    // via `speakerLabels` in the timings JSON — see attachTranscript().
+    var SPEAKER_LABELS = { veronica: 'AI Receptionist', caller: 'Caller' };
+
     var player      = document.getElementById('demoPlayer');
     var interactive = document.getElementById('demoInteractive');
     var fallback    = document.getElementById('demoFallback');
@@ -836,12 +840,20 @@
     function attachTranscript(data) {
       lines = data.lines.slice().sort(function (a, b) { return a.start - b.start; });
 
+      // Bubble labels resolve: per-demo override -> role default -> 'Caller'.
+      // The default is the ROLE, never a persona name. `veronica` is the speaker
+      // key for the AI receptionist across every demo, but lead-specific demos
+      // are recorded in different voices, so a hardcoded "Veronica" would put
+      // the wrong name on them. A demo that genuinely wants a named persona can
+      // set `speakerLabels` in its timings JSON.
+      var labels = (data.speakerLabels && typeof data.speakerLabels === 'object') ? data.speakerLabels : {};
+
       els = lines.map(function (ln) {
         var msg = document.createElement('div');
         msg.className = 'msg ' + (ln.speaker === 'veronica' ? 'veronica' : 'caller') + (reduce ? '' : ' animate');
         var who = document.createElement('div');
         who.className = 'who';
-        who.textContent = ln.speaker === 'veronica' ? 'Veronica · AI Receptionist' : 'Caller';
+        who.textContent = labels[ln.speaker] || SPEAKER_LABELS[ln.speaker] || SPEAKER_LABELS.caller;
         var bubble = document.createElement('div');
         bubble.className = 'bubble';
         bubble.textContent = ln.text;
