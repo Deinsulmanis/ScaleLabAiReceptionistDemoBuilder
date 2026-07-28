@@ -1,6 +1,6 @@
 {
   "audio": "demo-citycentre-emergency.mp3",
-  "totalDuration": 54.038,
+  "totalDuration": 53.011,
   "lines": [
     {
       "index": 0,
@@ -19,37 +19,37 @@
     {
       "index": 2,
       "speaker": "veronica",
-      "text": "Oh no — I'm sorry to hear that, let's get you looked after right away. A chipped tooth with pain is something we treat as urgent, so I'm going to flag this for the team immediately. Can I get your name and a number to reach you?",
-      "start": 13.426,
-      "end": 25.305
+      "text": "I'm sorry to hear that, let's get you looked after right away. A chipped tooth with pain is something we treat as urgent, so I'm going to flag this for the team immediately. Can I get your name and a number to reach you?",
+      "start": 13.421,
+      "end": 24.278
     },
     {
       "index": 3,
       "speaker": "caller",
       "text": "Yeah, it's Sam Carter — six oh four, five five five, oh one eight eight.",
-      "start": 25.717,
-      "end": 31.058
+      "start": 24.69,
+      "end": 30.031
     },
     {
       "index": 4,
       "speaker": "veronica",
       "text": "Thank you, Sam. I've flagged this as an emergency and I'm notifying Dr. Mannd's team right now so someone can get you seen as soon as possible today. In the meantime, if the pain worsens or you notice any swelling, please don't wait — let us know. Someone will be calling you back within a few minutes. Hang in there, okay?",
-      "start": 31.454,
-      "end": 49.231
+      "start": 30.426,
+      "end": 48.203
     },
     {
       "index": 5,
       "speaker": "caller",
       "text": "Okay, thank you so much.",
-      "start": 49.645,
-      "end": 51.316
+      "start": 48.617,
+      "end": 50.289
     },
     {
       "index": 6,
       "speaker": "veronica",
       "text": "Of course, Sam — talk to you very soon.",
-      "start": 51.716,
-      "end": 54.038
+      "start": 50.689,
+      "end": 53.011
     }
   ]
 }

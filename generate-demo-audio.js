@@ -78,7 +78,9 @@ const CONVERSATION_DENTAL = [
 const CONVERSATION_CITYCENTRE_EMERGENCY = [
   { speaker: 'veronica', text: "Thanks for calling City Centre Dentistry, Dr. Mannd's office — this is the front desk. How can I help you today?" },
   { speaker: 'caller',   text: "Hi — I think I might have a dental emergency? I chipped a tooth pretty badly this morning and it's really hurting." },
-  { speaker: 'veronica', text: "Oh no — I'm sorry to hear that, let's get you looked after right away. A chipped tooth with pain is something we treat as urgent, so I'm going to flag this for the team immediately. Can I get your name and a number to reach you?" },
+  // Opened with "Oh no — " originally. Cut: the receptionist should move
+  // straight to handling it once the caller has explained the problem.
+  { speaker: 'veronica', text: "I'm sorry to hear that, let's get you looked after right away. A chipped tooth with pain is something we treat as urgent, so I'm going to flag this for the team immediately. Can I get your name and a number to reach you?" },
   { speaker: 'caller',   text: "Yeah, it's Sam Carter — six oh four, five five five, oh one eight eight." },
   { speaker: 'veronica', text: "Thank you, Sam. I've flagged this as an emergency and I'm notifying Dr. Mannd's team right now so someone can get you seen as soon as possible today. In the meantime, if the pain worsens or you notice any swelling, please don't wait — let us know. Someone will be calling you back within a few minutes. Hang in there, okay?" },
   { speaker: 'caller',   text: "Okay, thank you so much." },
