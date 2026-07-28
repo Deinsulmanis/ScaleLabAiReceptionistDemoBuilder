@@ -82,9 +82,9 @@ const CONVERSATION_CITYCENTRE_EMERGENCY = [
   { speaker: 'caller',   text: "Yeah, it's Sam Carter — six oh four, five five five, oh one eight eight." },
   { speaker: 'veronica', text: "Thank you, Sam. I've flagged this as an emergency and I'm notifying Dr. Mannd's team right now so someone can get you seen as soon as possible today. In the meantime, if the pain worsens or you notice any swelling, please don't wait — let us know. Someone will be calling you back within a few minutes. Hang in there, okay?" },
   { speaker: 'caller',   text: "Okay, thank you so much." },
-  // Closing line removed: "Of course, Sam — help's on the way." reads as
-  // emergency services, not a dental front desk. The call now ends on the
-  // caller thanking them.
+  // Was "Of course, Sam — help's on the way." — that reads as emergency
+  // services dispatch, not a dental front desk. Same warmth, no 911 framing.
+  { speaker: 'veronica', text: "Of course, Sam — talk to you very soon." },
 ];
 
 // WARNING — the shipped demo-citycentre-emergency.mp3 is NOT a plain output of

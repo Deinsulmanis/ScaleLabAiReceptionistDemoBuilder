@@ -1,6 +1,6 @@
 {
   "audio": "demo-citycentre-emergency.mp3",
-  "totalDuration": 51.316,
+  "totalDuration": 54.038,
   "lines": [
     {
       "index": 0,
@@ -43,6 +43,13 @@
       "text": "Okay, thank you so much.",
       "start": 49.645,
       "end": 51.316
+    },
+    {
+      "index": 6,
+      "speaker": "veronica",
+      "text": "Of course, Sam — talk to you very soon.",
+      "start": 51.716,
+      "end": 54.038
     }
   ]
 }
