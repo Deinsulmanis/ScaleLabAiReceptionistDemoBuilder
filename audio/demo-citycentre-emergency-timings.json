@@ -1,0 +1,55 @@
+{
+  "audio": "demo-citycentre-emergency.mp3",
+  "totalDuration": 54.273,
+  "lines": [
+    {
+      "index": 0,
+      "speaker": "veronica",
+      "text": "Thanks for calling City Centre Dentistry, Dr. Mand's office — this is the front desk. How can I help you today?",
+      "start": 0,
+      "end": 5.712
+    },
+    {
+      "index": 1,
+      "speaker": "caller",
+      "text": "Hi — I think I might have a dental emergency? I chipped a tooth pretty badly this morning and it's really hurting.",
+      "start": 6.112,
+      "end": 12.939
+    },
+    {
+      "index": 2,
+      "speaker": "veronica",
+      "text": "Oh no — I'm sorry to hear that, let's get you looked after right away. A chipped tooth with pain is something we treat as urgent, so I'm going to flag this for the team immediately. Can I get your name and a number to reach you?",
+      "start": 13.339,
+      "end": 25.553
+    },
+    {
+      "index": 3,
+      "speaker": "caller",
+      "text": "Yeah, it's Sam Carter — 6 0 4... 5 5 5... 0 1 8 8.",
+      "start": 25.953,
+      "end": 31.386
+    },
+    {
+      "index": 4,
+      "speaker": "veronica",
+      "text": "Thank you, Sam. I've flagged this as an emergency and I'm notifying Dr. Mand's team right now so someone can get you seen as soon as possible today. In the meantime, if the pain worsens or you notice any swelling, please don't wait — let us know. Someone will be calling you back within a few minutes. Hang in there, okay?",
+      "start": 31.786,
+      "end": 49.99
+    },
+    {
+      "index": 5,
+      "speaker": "caller",
+      "text": "Okay, thank you so much.",
+      "start": 50.39,
+      "end": 51.737
+    },
+    {
+      "index": 6,
+      "speaker": "veronica",
+      "text": "Of course, Sam — help's on the way.",
+      "start": 52.137,
+      "end": 54.273
+    }
+  ]
+}
