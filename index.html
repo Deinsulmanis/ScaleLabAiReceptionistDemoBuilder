@@ -179,6 +179,14 @@
     .demo-stage.two .demo-player { max-width: 520px; }
   }
 
+  /* Lede above the player grid. Only ever matches an element created by the
+     per-lead copy pass, so it is inert for every generic prospect. */
+  .demos-lede {
+    position: relative; z-index: 2;
+    color: var(--muted); font-size: 0.95rem; line-height: 1.5;
+    max-width: 460px; margin: 0 auto 14px;
+  }
+
   /* Per-demo name, shown only when a lead has more than one demo. */
   .demo-name {
     font-size: 0.95rem; font-weight: 600; color: var(--ink);
@@ -627,6 +635,35 @@
           audio:   'audio/demo-citycentre-emergency.mp3',
           timings: 'audio/demo-citycentre-emergency-timings.json' },
       ],
+
+      // Per-lead copy. Consumed by the guarded pass in the personalization
+      // script; a lead without `copy` takes no part of that path at all.
+      //
+      // NOTE ON THE NAME: it is "Dr. Mand", one d, everywhere a human reads it.
+      // "Mannd" exists only inside generate-demo-audio.js as a pronunciation
+      // hack for ElevenLabs and must never reach page text.
+      copy: {
+        heroValue: "It answers every call your front desk can't — new patients, Invisalign and Botox consults, after-hours emergencies — and books your free consultation instead of sending them to voicemail.",
+
+        demosLede: "These are two of the calls your practice fields most:",
+
+        // Feature-card headline swaps, keyed by their current text.
+        caps: {
+          'Books appointments': 'Books your free consultation',
+        },
+
+        payoff: {
+          heading: "One recovered case pays for the year.",
+          body: "A missed cleaning is one thing. But the calls landing in voicemail after hours are the same ones that become Invisalign, implants, and cosmetic consults — cases worth thousands each, not hundreds. This doesn't need to catch many of those to be the best money you spend all year. It just needs to catch the ones you're missing right now.",
+        },
+
+        cta: {
+          heading: "Ready when you are, Dr. Mand.",
+          sub: "I built both of these from exactly what you told me — the new-patient and cosmetic calls, and the after-hours emergencies that were going to voicemail. If the way it handles them feels right, just reply to my email and I'll have you live this week: a quick 15-minute call to tune it to your services, and that's it. Want it to sound different anywhere? Tell me and I'll redo it — no charge.",
+          buttonText: "Reply to Deins →",
+          buttonHref: "mailto:deins@scalelabai.ca?subject=Re:%20City%20Centre%20Dentistry%20×%20ScaleLab%20AI&body=Hi%20Deins,%20I%20listened%20to%20the%20demos%20—",
+        },
+      },
     },
   };
 
@@ -740,6 +777,88 @@
           .replace(/a single recovered job/gi, 'a single recovered ' + bookingSg)
           .replace(/\ba job\b/gi, aBooking);
       });
+    }
+
+    // ── Per-lead copy override — allowlisted leads only ──────────────────────
+    // Runs LAST, deliberately: the niche vocabulary swap above rewrites p.body,
+    // p.lead and h2 by regex, so anything written here has to land after it or
+    // it would be mangled ("a single recovered job" -> "...appointment" etc).
+    //
+    // Entirely inert without LEAD.copy: LEAD is null for any company not in the
+    // allowlist and for an empty ?company=, so this whole block is skipped and
+    // the page renders exactly as it does for every generic prospect.
+    if (LEAD && LEAD.copy) {
+      var C = LEAD.copy;
+
+      // Sections carry no ids, so find them by their visible label rather than
+      // editing the shared markup to add hooks.
+      var sectionByLabel = function (name) {
+        var found = null;
+        document.querySelectorAll('main section').forEach(function (s) {
+          var lab = s.querySelector('.label');
+          if (lab && lab.textContent.trim().toLowerCase() === name) found = s;
+        });
+        return found;
+      };
+
+      // 1. Hero value line
+      if (C.heroValue) {
+        var hvEl = document.querySelector('[data-field="hero-value"]');
+        if (hvEl) hvEl.textContent = C.heroValue;
+      }
+
+      // 2. Lede directly above the player grid
+      if (C.demosLede) {
+        var stage = document.getElementById('demoStage');
+        if (stage && stage.parentNode) {
+          var lede = document.createElement('p');
+          lede.className = 'demos-lede';
+          lede.textContent = C.demosLede;
+          stage.parentNode.insertBefore(lede, stage);
+        }
+      }
+
+      // 3. Feature-card headline swaps, keyed by current text
+      if (C.caps) {
+        document.querySelectorAll('.cap h4').forEach(function (h) {
+          var k = h.textContent.trim();
+          if (Object.prototype.hasOwnProperty.call(C.caps, k)) h.textContent = C.caps[k];
+        });
+      }
+
+      // 4. Payoff section — heading plus a single replacement paragraph. The
+      //    section ships with two <p class="body">; the override is one block of
+      //    copy, so the first is rewritten and any others are removed.
+      if (C.payoff) {
+        var payoffSec = sectionByLabel('the return');
+        if (payoffSec) {
+          var ph = payoffSec.querySelector('h2');
+          if (ph && C.payoff.heading) ph.textContent = C.payoff.heading;
+          if (C.payoff.body) {
+            var bodies = payoffSec.querySelectorAll('p.body');
+            if (bodies.length) {
+              bodies[0].textContent = C.payoff.body;
+              for (var bi = 1; bi < bodies.length; bi++) bodies[bi].remove();
+            }
+          }
+        }
+      }
+
+      // 5. Closing CTA
+      if (C.cta) {
+        var ctaSec = document.querySelector('section.cta');
+        if (ctaSec) {
+          var ch = ctaSec.querySelector('h2');
+          if (ch && C.cta.heading) ch.textContent = C.cta.heading;
+          var cs = ctaSec.querySelector('.cta-sub');
+          if (cs && C.cta.sub) cs.textContent = C.cta.sub;
+          var cb = ctaSec.querySelector('.btn');
+          if (cb) {
+            if (C.cta.buttonText) cb.textContent = C.cta.buttonText;
+            if (C.cta.buttonHref) cb.href = C.cta.buttonHref;
+          }
+        }
+      }
     }
 
     // GA4: report which prospect viewed this proposal

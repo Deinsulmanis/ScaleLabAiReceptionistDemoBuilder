@@ -5,7 +5,7 @@
     {
       "index": 0,
       "speaker": "veronica",
-      "text": "Thanks for calling City Centre Dentistry, Dr. Mannd's office — this is the front desk. How can I help you today?",
+      "text": "Thanks for calling City Centre Dentistry, Dr. Mand's office — this is the front desk. How can I help you today?",
       "start": 0,
       "end": 5.991
     },
@@ -33,7 +33,7 @@
     {
       "index": 4,
       "speaker": "veronica",
-      "text": "Thank you, Sam. I've flagged this as an emergency and I'm notifying Dr. Mannd's team right now so someone can get you seen as soon as possible today. In the meantime, if the pain worsens or you notice any swelling, please don't wait — let us know. Someone will be calling you back within a few minutes. Hang in there, okay?",
+      "text": "Thank you, Sam. I've flagged this as an emergency and I'm notifying Dr. Mand's team right now so someone can get you seen as soon as possible today. In the meantime, if the pain worsens or you notice any swelling, please don't wait — let us know. Someone will be calling you back within a few minutes. Hang in there, okay?",
       "start": 30.426,
       "end": 48.203
     },
