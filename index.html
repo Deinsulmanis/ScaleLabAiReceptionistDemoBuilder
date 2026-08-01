@@ -260,6 +260,16 @@
     background: linear-gradient(135deg, rgba(34,211,238,0.15), rgba(139,92,246,0.15));
     color: var(--ink); border-color: rgba(34,211,238,0.28); border-bottom-right-radius: 5px;
   }
+  /* Word-level highlight. `.w` spans only exist for a timings file that carries
+     word arrays (the spoken intro); the TTS demos render plain text and are
+     untouched by every rule here. Dimming applies only inside the ACTIVE
+     bubble, so finished bubbles stay fully legible. */
+  .msg.active .bubble .w { opacity: 0.38; transition: opacity .14s linear; }
+  .msg.active .bubble .w.spoken { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) {
+    .msg.active .bubble .w { transition: none; }
+  }
+
   .msg.active .bubble { border-color: var(--cyan); box-shadow: 0 0 0 1px rgba(34,211,238,.5), 0 0 22px rgba(34,211,238,.26); }
   .msg.veronica.active .bubble { border-color: var(--violet-soft); box-shadow: 0 0 0 1px rgba(139,92,246,.5), 0 0 22px rgba(139,92,246,.3); }
   .msg.active { animation: msgpulse 2.2s ease-in-out infinite; }
@@ -901,9 +911,24 @@
     // Only a lead explicitly listed in LEAD_DEMOS gets a different set. LEAD is
     // null for everyone else, so `demos` is a one-element array and the stage
     // keeps its single static player untouched.
+    // The DEFAULT branch now carries two players: a spoken intro, then the
+    // niche demo. Both go through createPlayer unchanged, and two entries means
+    // demos.length > 1, so the stage picks up the existing `.two` 1fr 1fr grid
+    // for free — no new layout code.
+    //
+    // The LEAD branch is untouched. A lead with a custom LEAD_DEMOS set gets
+    // exactly the demos that entry lists and never sees the intro, so
+    // lead-specific pages stay frozen.
+    var INTRO_DEMO = {
+      label:   'A word from Deins',
+      audio:   'audio/intro-deins.mp3',
+      timings: 'audio/intro-deins-timings.json',
+    };
+
     var demos = (LEAD && LEAD.demos)
       ? LEAD.demos
-      : [{ label: null, audio: NICHE.audio, timings: NICHE.timings }];
+      : [INTRO_DEMO,
+         { label: 'Hear the receptionist', audio: NICHE.audio, timings: NICHE.timings }];
 
     // Clone the static player once per extra demo. With one demo this loop does
     // not run at all and the DOM is exactly what the server sent.
@@ -1037,6 +1062,8 @@
     var duration = 0;   // whichever of audio metadata / timings arrives first
     var started  = false;
     var lastIdx  = -2;
+    var hasWords = false;  // true only if the timings file carries word arrays
+    var rafId    = null;
 
     updateProgress(0);
 
@@ -1056,16 +1083,19 @@
       playToggle.classList.add('is-playing');
       playToggle.setAttribute('aria-label', 'Pause');
       logDemoPlayed(AUDIO_SRC);
+      startWordTick();
       for (var ci = 0; ci < playCbs.length; ci++) playCbs[ci]();
     });
     audio.addEventListener('pause', function () {
       playToggle.classList.remove('is-playing');
       playToggle.setAttribute('aria-label', 'Play');
+      stopWordTick();
     });
     audio.addEventListener('timeupdate', function () { onTime(audio.currentTime); });
     audio.addEventListener('ended', function () {
       for (var i = 0; i < els.length; i++) els[i].classList.remove('active');
       lastIdx = -2;
+      stopWordTick();
     });
 
     var dragging = false;
@@ -1104,6 +1134,12 @@
       // set `speakerLabels` in its timings JSON.
       var labels = (data.speakerLabels && typeof data.speakerLabels === 'object') ? data.speakerLabels : {};
 
+      // A timings file MAY carry a per-line `words` array. When it does, the
+      // bubble is built from <span> per word so playback can light them up one
+      // at a time. The TTS demos have no `words`, so they take the plain-text
+      // branch and behave exactly as before — see wordTick() for the other half.
+      hasWords = lines.some(function (ln) { return ln.words && ln.words.length; });
+
       els = lines.map(function (ln) {
         var msg = document.createElement('div');
         msg.className = 'msg ' + (ln.speaker === 'veronica' ? 'veronica' : 'caller') + (reduce ? '' : ' animate');
@@ -1112,7 +1148,16 @@
         who.textContent = labels[ln.speaker] || SPEAKER_LABELS[ln.speaker] || SPEAKER_LABELS.caller;
         var bubble = document.createElement('div');
         bubble.className = 'bubble';
-        bubble.textContent = ln.text;
+        if (ln.words && ln.words.length) {
+          ln.words.forEach(function (w, wi) {
+            var sp = document.createElement('span');
+            sp.className = 'w';
+            sp.textContent = (wi ? ' ' : '') + w.text;
+            bubble.appendChild(sp);
+          });
+        } else {
+          bubble.textContent = ln.text;
+        }
         msg.appendChild(who); msg.appendChild(bubble);
         chatWindow.appendChild(msg);
         return msg;
@@ -1193,6 +1238,41 @@
       var idx = idxForTime(t);
       if (idx !== lastIdx) { renderMessages(idx); lastIdx = idx; }
       updateProgress(t);
+      if (hasWords) highlightWords(t, idx);
+    }
+
+    // ── Word-level highlight ─────────────────────────────────────────────────
+    // Only ever runs for a timings file that carries `words` (currently the
+    // spoken intro). For the TTS demos hasWords stays false, the rAF loop never
+    // starts, no .w spans exist, and nothing below has any effect.
+    //
+    // Driven by rAF rather than the audio's own timeupdate: timeupdate fires
+    // roughly every 250ms, which is far too coarse to land on individual words
+    // and would visibly lag the voice.
+    function highlightWords(t, idx) {
+      if (idx < 0 || !lines[idx] || !lines[idx].words) return;
+      var ws = lines[idx].words;
+      var spans = els[idx].querySelectorAll('.w');
+      for (var i = 0; i < spans.length && i < ws.length; i++) {
+        // A word counts as spoken once it has started, so the highlight lands
+        // with the voice rather than trailing a whole word behind it.
+        spans[i].classList.toggle('spoken', t >= ws[i].start);
+      }
+    }
+
+    function startWordTick() {
+      if (!hasWords || rafId !== null || !window.requestAnimationFrame) return;
+      var tick = function () {
+        if (audio.paused) { rafId = null; return; }
+        highlightWords(audio.currentTime, idxForTime(audio.currentTime));
+        rafId = window.requestAnimationFrame(tick);
+      };
+      rafId = window.requestAnimationFrame(tick);
+    }
+
+    function stopWordTick() {
+      if (rafId !== null && window.cancelAnimationFrame) window.cancelAnimationFrame(rafId);
+      rafId = null;
     }
 
     // First play expands the card: transcript + controls slide in. Pre-play the
