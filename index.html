@@ -947,31 +947,50 @@
     if (demos.length > 1) stage.classList.add('two');
 
     // ── Demo-played tracking pixel ───────────────────────────────────────────
-    // Fires ONCE per page view regardless of which player, or how many. With
-    // two players this still means one pixel and one GA4 event for the page —
-    // playing both demos is one prospect showing interest, not two, and the
-    // sheet must not double-count it. Declared out here, shared by every
-    // instance, for exactly that reason.
-    var demoPlayLogged = false;
+    // Throttled ONCE PER AUDIO SOURCE, not once per page view.
+    //
+    // It used to be once per page. That was survivable when the only thing on
+    // the page was the demo, but it breaks in two ways now:
+    //   - the intro plays first, so it would consume the single fire and the
+    //     actual demo listen would never be logged at all;
+    //   - on a two-demo page only the first demo played was ever recorded.
+    // Keying on src fixes both: every distinct clip logs exactly once, and
+    // replaying the same clip still logs once.
+    //
+    // audio_type separates "heard the 14s hello" from "heard the receptionist",
+    // so the DemoPlays sheet stays a clean demo-listen signal — filter
+    // audio_type=demo. Derived by identity against INTRO_DEMO.audio rather than
+    // by sniffing the filename.
+    //
+    // SCOPE: this also changes logging for City Centre and any future
+    // multi-demo page — each demo played now logs its own row instead of only
+    // the first. Rendering is untouched; only what reaches the sheet changes.
+    var loggedSrcs = {};
     function logDemoPlayed(audioSrc) {
-      if (demoPlayLogged) return;
-      demoPlayLogged = true;
+      if (!audioSrc) return;
+      if (Object.prototype.hasOwnProperty.call(loggedSrcs, audioSrc)) return;
+      loggedSrcs[audioSrc] = true;
+
+      var audioType = (audioSrc === INTRO_DEMO.audio) ? 'intro' : 'demo';
       var q  = new URLSearchParams(window.location.search);
       var co = (q.get('company') || '').trim();
       var nc = (q.get('niche')   || '').trim();
-      var qs = 'company=' + encodeURIComponent(co) + (nc ? '&niche=' + encodeURIComponent(nc) : '');
+      var qs = 'company=' + encodeURIComponent(co) +
+               (nc ? '&niche=' + encodeURIComponent(nc) : '') +
+               '&audio_type=' + audioType;
       new Image().src = 'https://receptionist.scalelabai.ca/demo-played?' + qs;
 
-      // NEW: mirror the play into GA4. The pixel above remains the source of
-      // truth for the DemoPlays sheet and the warm-follow-up trigger — nothing
-      // is gated on this event, it exists so play rate is visible in GA4
+      // Mirror the play into GA4. The pixel above remains the source of truth
+      // for the DemoPlays sheet and the warm-follow-up trigger — nothing is
+      // gated on this event, it exists so play rate is visible in GA4
       // alongside proposal_viewed / scroll_depth / time_on_page.
       if (typeof gtag === 'function') {
         gtag('event', 'demo_play', {
           company:    co || '(none)',
           niche:      nc || '(none)',
           niche_key:  NICHE.key,
-          demo_audio: audioSrc
+          demo_audio: audioSrc,
+          audio_type: audioType
         });
       }
     }
