@@ -911,24 +911,30 @@
     // Only a lead explicitly listed in LEAD_DEMOS gets a different set. LEAD is
     // null for everyone else, so `demos` is a one-element array and the stage
     // keeps its single static player untouched.
-    // The DEFAULT branch now carries two players: a spoken intro, then the
-    // niche demo. Both go through createPlayer unchanged, and two entries means
-    // demos.length > 1, so the stage picks up the existing `.two` 1fr 1fr grid
-    // for free — no new layout code.
+    // The spoken intro is DENTAL-ONLY. Its script names the vertical out loud
+    // ("five free demos for dental clinics like yourself", "your clinic"), so on
+    // a roofer's or an HVAC page it would be plainly wrong. Gated on NICHE.key,
+    // the same normalised value the hero copy and the demo audio already resolve
+    // from — no second niche parse.
     //
-    // The LEAD branch is untouched. A lead with a custom LEAD_DEMOS set gets
-    // exactly the demos that entry lists and never sees the intro, so
-    // lead-specific pages stay frozen.
+    // A dental page gets [intro, demo]: two entries, so the stage picks up the
+    // existing `.two` 1fr 1fr grid for free. Every other niche keeps the exact
+    // single-demo expression it had before the intro existed, so those pages are
+    // byte-identical and never request the intro files.
+    //
+    // The LEAD branch is untouched either way: a lead with a custom LEAD_DEMOS
+    // set gets exactly the demos that entry lists and never sees the intro.
     var INTRO_DEMO = {
       label:   'A word from Deins',
       audio:   'audio/intro-deins.mp3',
       timings: 'audio/intro-deins-timings.json',
     };
 
-    var demos = (LEAD && LEAD.demos)
-      ? LEAD.demos
-      : [INTRO_DEMO,
-         { label: 'Hear the receptionist', audio: NICHE.audio, timings: NICHE.timings }];
+    var demos =
+      (LEAD && LEAD.demos)      ? LEAD.demos
+    : (NICHE.key === 'dental')  ? [INTRO_DEMO,
+                                   { label: 'Hear the receptionist', audio: NICHE.audio, timings: NICHE.timings }]
+                                : [{ label: null, audio: NICHE.audio, timings: NICHE.timings }];
 
     // Clone the static player once per extra demo. With one demo this loop does
     // not run at all and the DOM is exactly what the server sent.
